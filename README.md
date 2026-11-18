@@ -82,3 +82,14 @@ Depois abra `http://localhost:8000`. Para zerar a demonstração, use o botão *
 ## Publicar no GitHub Pages
 
 Em **Settings → Pages**, escolha a branch `main` e a pasta raiz. A página de vendas fica no endereço principal e o cardápio em `/cardapio.html`.
+
+## Licença
+
+Este projeto usa a licença [PolyForm Noncommercial 1.0.0](LICENSE.md).
+
+- **Pode:** ver o código, estudar, testar e adaptar para uso pessoal, estudo ou pesquisa, sem fins lucrativos.
+- **Não pode:** usar, vender, revender ou oferecer o projeto (ou uma versão modificada dele) para fins comerciais, como cobrar de restaurantes pelo uso.
+
+Para uso comercial, entre em contato com a autora.
+
+Copyright (c) 2026 [larissadefarias](https://github.com/larissadefarias)
