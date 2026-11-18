@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MesaLivre Logo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Playfair+Display:wght@600;700&family=Rubik:wght@600;800&family=Inter+Tight:wght@400;500;600&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+/* Layout: cabeçalho curto e três propostas empilhadas; cada uma com assinatura no claro e no escuro, tamanhos reais e usos */
+:root{
+  --bg:#F7F4EE; --surface:#FFFFFF; --ink:#1D1B22; --muted:#6A6470; --line:#E6E0D6; --focus:#2E86DE;
+  --f-body:"Inter Tight", "Segoe UI", system-ui, sans-serif;
+  --f-d:"Outfit", "Segoe UI", system-ui, sans-serif;
+  --f-e:"Playfair Display", Georgia, "Times New Roman", serif;
+  --f-f:"Rubik", "Arial Black", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#17161B;--surface:#211F26;--ink:#F1EDE6;--muted:#A9A3AE;--line:#33303A;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17161B;--surface:#211F26;--ink:#F1EDE6;--muted:#A9A3AE;--line:#33303A;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1060px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px;display:flex;flex-direction:column;gap:24px}
+h1,h2{margin:0;text-wrap:balance;font-family:var(--f-d);letter-spacing:-.01em}
+h1{font-size:32px;font-weight:800}
+.lead{margin:6px 0 0;color:var(--muted);max-width:64ch}
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.opt-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.opt-h h2{font-size:22px;font-weight:700}
+.opt-h p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.pick{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--ink);color:var(--bg);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.lockups{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.lock{border-radius:16px;padding:26px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:0;text-align:center}
+.lock svg{width:150px;height:150px;max-width:100%}
+.word{line-height:1;font-size:40px}
+.tag{font-size:14px;letter-spacing:.42em;margin-right:-.42em}
+.row{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap}
+.cell{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip{border-radius:14px;display:grid;place-items:center}
+.appicon{width:76px;height:76px;border-radius:18px;overflow:hidden;display:grid;place-items:center;box-shadow:0 8px 20px -10px rgba(0,0,0,.45)}
+.appicon svg{width:60px;height:60px}
+.tabmock{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:10px 10px 0 0;padding:8px 12px;font-size:13px}
+.tabmock svg{width:18px;height:18px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:9px 14px;font-weight:600}
+button:hover{border-color:var(--ink)}
+button:focus-visible{outline:2.5px solid var(--focus);outline-offset:2px}
+.pal{display:flex;gap:8px;flex-wrap:wrap}
+.pal span{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 10px 4px 4px}
+.pal i{width:18px;height:18px;border-radius:50%;display:block}
+.note{color:var(--muted);font-size:13.5px;margin:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600}
+#copybuf{position:absolute;left:-9999px}
+@media (max-width:420px){.word{font-size:32px}.lock svg{width:120px;height:120px}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>MesaLivre · segunda rodada</h1>
+    <p class="lead">Três caminhos a partir das referências que você mandou: o cloche com talheres, o selo vintage e o chef, que agora entrega o cardápio em vez da pizza. Cada um tem uma versão reduzida para ícone de app e QR code.</p>
+  </header>
+  <div id="opts"></div>
+</div>
+<div id="toast" class="toast" hidden></div>
+<textarea id="copybuf" aria-hidden="true" tabindex="-1"></textarea>
+
+<script>
+let UID = 0;
+/* ---------- D · Cloche com cardápio ---------- */
+function cloche(c, mono) {
+  const id = 'm' + (++UID), dome = mono ? 'currentColor' : c.main;
+  return `<defs><mask id="${id}"><rect width="120" height="120" fill="#fff"/>
+      <rect x="43" y="52" width="34" height="29" rx="4" fill="#000"/>
+      <path d="M28 82 V60 M24 60 V68 Q24 71 28 71 Q32 71 32 68 V60" stroke="#000" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <path d="M92 82 V58 Q86 62 86 72 H92" stroke="#000" stroke-width="2.8" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+    </mask></defs>
+    <circle cx="60" cy="31" r="5.5" fill="${dome}"/><rect x="56" y="34" width="8" height="8" rx="2" fill="${dome}"/>
+    <path d="M17 85 A43 43 0 0 1 103 85 Z" fill="${dome}" mask="url(#${id})"/>
+    <path d="M49 60 H66 M49 66.5 H71 M49 73 H63" stroke="${dome}" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="70.5" cy="60" r="2" fill="${dome}"/><circle cx="68.5" cy="73" r="2" fill="${dome}"/>
+    <rect x="7" y="87" width="106" height="10" rx="5" fill="${mono ? 'currentColor' : c.main}"/>`;
+}
+/* ---------- E · Selo vintage ---------- */
+function selo(c, mono, reduced) {
+  const id = 'r' + (++UID), k = mono ? 'currentColor' : c.main;
+  const ring = reduced ? '' : `<defs><path id="${id}" d="M60 60 m-45 0 a45 45 0 1 1 90 0 a45 45 0 1 1 -90 0"/></defs>
+    <circle cx="60" cy="60" r="57" fill="none" stroke="${k}" stroke-width="2.6"/>
+    <circle cx="60" cy="60" r="41" fill="none" stroke="${k}" stroke-width="1.4"/>
+    <text fill="${k}" font-family="Playfair Display, Georgia, serif" font-weight="700" font-size="9" letter-spacing="1"><textPath href="#${id}" textLength="276" lengthAdjust="spacing">MESALIVRE ✦ CARDÁPIO DIGITAL ✦ DESDE 2026 ✦</textPath></text>`;
+  const s = reduced ? 'translate(60 60) scale(1.32) translate(-60 -62)' : '';
+  return `${ring}<g transform="${s}">
+    <circle cx="60" cy="37" r="3.6" fill="${k}"/>
+    <path d="M36 70 A24 24 0 0 1 84 70" fill="none" stroke="${k}" stroke-width="2.8"/>
+    <path d="M67 49.5 Q77 55 79.5 68 M63 52.5 Q71 57 73 68 M60 55.5 Q65 59 66.5 68" fill="none" stroke="${k}" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M42 63 Q45 55 52 50.5" fill="none" stroke="${k}" stroke-width="2" stroke-linecap="round"/>
+    <path d="M28 71.5 Q60 77 92 71.5 Q91 77.5 60 80 Q29 77.5 28 71.5 Z" fill="${k}"/>
+    <path d="M60 87 Q52 82 44 87 Q52 91 60 87 Z M60 87 Q68 82 76 87 Q68 91 60 87 Z" fill="${k}"/>
+    <circle cx="60" cy="92.5" r="1.8" fill="${k}"/>
+  </g>`;
+}
+/* ---------- F · Chef com cardápio ---------- */
+function chef(c, mono, reduced) {
+  const o = mono ? 'currentColor' : c.ink, skin = mono ? 'none' : c.skin, white = mono ? 'none' : c.white, coat = mono ? 'none' : c.coat, paper = mono ? 'none' : c.paper, acc = mono ? 'currentColor' : c.coat;
+  const head = `
+    <circle cx="40.5" cy="73" r="5" fill="${skin}" stroke="${o}" stroke-width="2.6"/><circle cx="79.5" cy="73" r="5" fill="${skin}" stroke="${o}" stroke-width="2.6"/>
+    <circle cx="60" cy="71" r="20" fill="${skin}" stroke="${o}" stroke-width="2.8"/>
+    <path d="M38 48 Q28 41 35 31 Q37 20 50 22 Q56 11 67 17 Q79 13 83 26 Q93 33 82 48 Z" fill="${white}" stroke="${o}" stroke-width="2.8" stroke-linejoin="round"/>
+    <rect x="40" y="45" width="40" height="10" rx="3.5" fill="${white}" stroke="${o}" stroke-width="2.8"/>
+    <path d="M50 30 Q52 36 51 42 M66 26 Q69 33 68 42" fill="none" stroke="${o}" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="52.5" cy="67" r="2.5" fill="${o}"/>
+    <path d="M64.5 67.5 Q67.5 64.5 70.5 67.5" fill="none" stroke="${o}" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M49 61.5 Q52.5 59.5 56 61.5 M64 61.5 Q67.5 59.5 71 61.5" fill="none" stroke="${o}" stroke-width="2" stroke-linecap="round"/>
+    ${mono ? '' : `<circle cx="47" cy="75" r="3.4" fill="${c.coat}" opacity=".35"/><circle cx="73" cy="75" r="3.4" fill="${c.coat}" opacity=".35"/>`}
+    <path d="M47 78.5 Q53 72.5 60 76.5 Q67 72.5 73 78.5 Q67 82.5 60 79.5 Q53 82.5 47 78.5 Z" fill="${o}"/>
+    <path d="M55.5 84 Q60 87.5 64.5 84" fill="none" stroke="${o}" stroke-width="2.2" stroke-linecap="round"/>`;
+  if (reduced) return `<g transform="translate(60 60) scale(1.25) translate(-60 -54)">${head}</g>`;
+  return `
+    <path d="M27 119 Q28 95 52 91 L68 91 Q90 95 92 119 Z" fill="${coat}" stroke="${o}" stroke-width="2.8" stroke-linejoin="round"/>
+    <path d="M52 91 L60 101 L68 91" fill="${white}" stroke="${o}" stroke-width="2.4" stroke-linejoin="round"/>
+    <circle cx="60" cy="107" r="1.9" fill="${o}"/><circle cx="60" cy="114" r="1.9" fill="${o}"/>
+    <path d="M84 99 Q97 92 100 71" fill="none" stroke="${o}" stroke-width="12" stroke-linecap="round"/>
+    <path d="M84 99 Q97 92 100 71" fill="none" stroke="${mono ? 'var(--chipbg, #fff)' : c.coat}" stroke-width="6.6" stroke-linecap="round"/>
+    ${head}
+    <g transform="rotate(-10 101 44)">
+      <rect x="86" y="21" width="31" height="42" rx="3.5" fill="${paper}" stroke="${o}" stroke-width="2.6"/>
+      <rect x="91" y="26.5" width="21" height="6" rx="2" fill="${acc}"/>
+      <path d="M91 39 H107 M91 45 H112 M91 51 H104 M91 57 H109" stroke="${o}" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <circle cx="100" cy="66" r="5.8" fill="${skin}" stroke="${o}" stroke-width="2.6"/>`;
+}
+
+const OPTS = [
+  { key: 'D', name: 'D · Cloche com cardápio', pick: true,
+    desc: 'O cloche da sua primeira referência, mas em vez de talheres soltos ele guarda um cardápio vazado no meio, com garfo e faca nas laterais. Uma forma só, que funciona em qualquer tamanho e numa cor. É a que eu escolheria para o produto.',
+    pal: { main: '#2E86DE', ink: '#13205E', bg: '#F3F7FD', dark: '#13205E', darkMain: '#5AA9F0', tag: '#2E86DE' },
+    font: 'var(--f-d)', weight: 800, tagW: 600,
+    full: (p, m) => cloche({ main: p }, m), small: (p, m) => cloche({ main: p }, m) },
+  { key: 'E', name: 'E · Selo de casa tradicional',
+    desc: 'Inspirado no cloche gravado: um selo redondo com o nome girando em volta e o cloche em traço fino com sombreado de gravura. Passa tradição e cuidado. Pequeno, vira só o cloche.',
+    pal: { main: '#8C2F26', ink: '#8C2F26', bg: '#F4E9E2', dark: '#5E1F19', darkMain: '#F4E9E2', tag: '#8C2F26' },
+    font: 'var(--f-e)', weight: 700, tagW: 600,
+    full: (p, m) => selo({ main: p }, m, false), small: (p, m) => selo({ main: p }, m, true) },
+  { key: 'F', name: 'F · Chef Livre, o mascote',
+    desc: 'O pizzaiolo virou o chef da MesaLivre: em vez da pizza, ele levanta o cardápio da casa, com uma piscadinha. Ótimo para redes sociais, adesivos e a tela de boas-vindas. Pequeno, fica só o rosto com o chapéu.',
+    pal: { main: '#6E1F1F', ink: '#6E1F1F', bg: '#F4F1E0', dark: '#6E1F1F', darkMain: '#F4F1E0', tag: '#E2574C' },
+    font: 'var(--f-f)', weight: 800, tagW: 600,
+    full: (p, m, dark) => chef({ ink: dark ? '#2B0E0E' : '#6E1F1F', skin: '#F6D2B0', white: '#FFFDF7', coat: '#E2574C', paper: '#FFF6E2' }, m),
+    small: (p, m) => chef({ ink: '#6E1F1F', skin: '#F6D2B0', white: '#FFFDF7', coat: '#E2574C', paper: '#FFF6E2' }, m, true) },
+];
+
+const svgTag = (inner, size, extra = '') => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="${size}" height="${size}" ${extra}>${inner}</svg>`;
+function say(m){ const t = document.getElementById('toast'); t.textContent = m; t.hidden = false; clearTimeout(say.t); say.t = setTimeout(() => t.hidden = true, 2000); }
+async function copy(text){ try { await navigator.clipboard.writeText(text); say('SVG copiado'); } catch { const b = document.getElementById('copybuf'); b.value = text; b.select(); say('Texto selecionado. Use Ctrl+C para copiar'); } }
+
+document.getElementById('opts').innerHTML = OPTS.map(o => {
+  const p = o.pal;
+  const word = (color) => `<div class="word" style="font-family:${o.font};font-weight:${o.weight};color:${color}">MESALIVRE</div>`;
+  const tag = (color) => `<div class="tag" style="font-family:${o.font};font-weight:${o.tagW};color:${color}">DESDE 2026</div>`;
+  return `<section class="opt">
+    <div class="opt-h"><div><h2>${o.name}</h2><p>${o.desc}</p></div>${o.pick ? '<span class="pick">Minha escolha</span>' : ''}</div>
+    <div class="lockups">
+      <div class="lock" style="background:${p.bg}">${svgTag(o.full(p.main, false, false), 150, 'role="img" aria-label="Logo ' + o.name + '"')}${word(p.ink)}${tag(p.tag)}</div>
+      <div class="lock" style="background:${p.dark}">${o.key === 'F' ? svgTag(o.full(p.main, false, true), 150, 'aria-hidden="true"') : svgTag(o.full(p.darkMain, false), 150, 'aria-hidden="true"')}${word(o.key === 'F' ? '#F4F1E0' : (o.key === 'D' ? '#FFFFFF' : p.darkMain))}${tag(o.key === 'D' ? p.darkMain : (o.key === 'F' ? '#F6B0A8' : p.darkMain))}</div>
+    </div>
+    <div class="row">
+      ${[64, 40, 24, 16].map(n => `<div class="cell"><div class="chip" style="width:${n + 8}px;height:${n + 8}px;background:${p.bg}">${svgTag(o.small(p.main, false), n, 'aria-hidden="true"')}</div>${n}px</div>`).join('')}
+      <div class="cell"><div style="display:flex;gap:8px">
+        <div class="chip" style="width:58px;height:58px;background:#FFFFFF;color:#111">${svgTag(o.small('#111', true), 44, 'aria-hidden="true"')}</div>
+        <div class="chip" style="width:58px;height:58px;background:#111;color:#FFF;--chipbg:#111">${svgTag(o.small('#fff', true), 44, 'aria-hidden="true"')}</div>
+      </div>uma cor só</div>
+      <div class="cell"><div style="display:flex;gap:12px;align-items:center"><div class="appicon" style="background:${o.key === 'D' ? p.main : p.dark}">${svgTag(o.small(o.key === 'D' ? '#FFFFFF' : p.darkMain, false), 60, 'aria-hidden="true"')}</div>
+        <div class="tabmock">${svgTag(o.small(p.main, false), 18, 'aria-hidden="true"')}MesaLivre · Cardápio</div></div>ícone de app e aba</div>
+    </div>
+    <div class="pal">${[...new Set([p.main, p.ink, p.tag, p.bg, p.dark])].map(h => `<span><i style="background:${h};border:1px solid var(--line)"></i>${h}</span>`).join('')}</div>
+    <div class="tools">
+      <button data-k="${o.key}" data-v="full">Copiar SVG do símbolo</button>
+      <button data-k="${o.key}" data-v="small">Copiar SVG reduzido</button>
+    </div>
+  </section>`;
+}).join('');
+document.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => {
+  const o = OPTS.find(x => x.key === b.dataset.k);
+  copy(svgTag(b.dataset.v === 'full' ? o.full(o.pal.main, false, false) : o.small(o.pal.main, false), 512));
+}));
+</script>
+</body>
+</html>

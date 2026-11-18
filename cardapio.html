@@ -1,0 +1,1375 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brasa &amp; Manjericão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800&family=Inter+Tight:wght@400;500;600;700&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+/* Layout: topo com mesa + happy hour, abas de categoria fixas, grade de pratos, gaveta de pedido e barra flutuante. Identidade MesaLivre: vinho, coral e creme, com o Chef Livre */
+:root{
+  --bg:#F4F1E0; --surface:#FFFDF7; --surface-2:#EAE4CC; --ink:#2B1414; --muted:#6E5C55; --line:#E0D8BF;
+  --brand:#6E1F1F; --on-brand:#FFF8EE; --accent:#E2574C; --on-accent:#FFFFFF; --chili:#B3261E; --ok:#2B8452;
+  --shadow:0 10px 30px -12px rgba(43,20,20,.3);
+  --f-display:"Rubik", "Arial Black", system-ui, sans-serif;
+  --f-body:"Inter Tight", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1B1213; --surface:#251A1B; --surface-2:#312223; --ink:#F4EEE3; --muted:#BCA9A2; --line:#3E2C2D;
+  --brand:#F2A096; --on-brand:#2B1414; --accent:#FF7B6E; --on-accent:#2B1414; --chili:#FFB0A4; --ok:#6FD39A;
+  --shadow:0 10px 30px -12px rgba(0,0,0,.7); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#1B1213; --surface:#251A1B; --surface-2:#312223; --ink:#F4EEE3; --muted:#BCA9A2; --line:#3E2C2D;
+  --brand:#F2A096; --on-brand:#2B1414; --accent:#FF7B6E; --on-accent:#2B1414; --chili:#FFB0A4; --ok:#6FD39A;
+  --shadow:0 10px 30px -12px rgba(0,0,0,.7); color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:8px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Topo */
+.top{padding-block:20px 8px;display:flex;flex-direction:column;gap:14px}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:12px}
+.mark{width:46px;height:46px;border-radius:14px;background:var(--brand);color:var(--on-brand);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:20px}
+.logo h1{font-size:24px;font-weight:800;line-height:1}
+.logo small{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-weight:600;font-size:13px;white-space:nowrap}
+.pill:hover{border-color:var(--brand)}
+.pill[disabled]{opacity:.55;cursor:not-allowed}
+.table-tag{background:var(--brand);color:var(--on-brand);border-color:transparent}
+.hh{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--accent);color:var(--on-accent);border-radius:18px;padding:12px 16px}
+.hh b{font-family:var(--f-display);font-size:18px}
+.hh .clock{margin-left:auto;font-family:var(--f-display);font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+
+/* Busca e filtros */
+.tools{display:flex;flex-direction:column;gap:10px;padding-block:10px}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 12px}
+.search input{flex:1;min-width:0;border:0;background:none;padding:12px 0;outline:none;font-size:16px}
+.search svg{flex:none;opacity:.6}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sort{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 10px;font-size:13px;font-weight:600}
+
+/* Abas de categoria */
+.catbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.cats{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:8px}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex:none;padding:8px 14px;border-radius:10px;font-weight:600;color:var(--muted)}
+.cat.on{color:var(--ink);background:var(--surface-2)}
+.cat .n{font-size:11px;margin-left:4px;opacity:.6}
+
+/* Destaques */
+.featured{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding-block:18px 6px}
+.feat{position:relative;display:flex;gap:14px;align-items:center;text-align:left;background:var(--brand);color:var(--on-brand);border-radius:20px;padding:14px;overflow:hidden}
+.feat .plate{width:76px;height:76px}
+.feat small{text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:700;opacity:.8}
+.feat h3{font-size:18px;margin-top:2px}
+.feat.alt{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.feat.quiz{background:var(--ink);color:var(--bg)}
+
+/* Seções e cards */
+section.catsec{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 64px);padding-block:22px 4px}
+section.catsec h2{font-size:26px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+section.catsec h2 span{font-family:var(--f-body);font-size:13px;font-weight:500;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px;margin-top:12px}
+.card{display:flex;gap:14px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;position:relative;transition:transform .15s,border-color .15s;min-width:0}
+.card:hover{border-color:var(--brand);transform:translateY(-2px)}
+.card.out{opacity:.6}
+.card .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.card h3{font-size:17px;font-weight:700;line-height:1.2;padding-right:28px}
+.card p{margin:0;color:var(--muted);font-size:13.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:auto}
+.price{font-family:var(--f-display);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+.price s{font-family:var(--f-body);font-weight:500;font-size:13px;color:var(--muted);margin-right:4px}
+.tag{font-size:11px;font-weight:700;padding:3px 7px;border-radius:6px;background:var(--surface-2);color:var(--muted);letter-spacing:.02em}
+.tag.hot{color:var(--chili)}
+.tag.pop,.tag.hit{background:var(--accent);color:var(--on-accent)}
+.tag.hit::before{content:"★ "}
+.plate.photo{overflow:hidden;background:var(--surface-2);box-shadow:none}
+.plate.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.note a{color:var(--brand);font-weight:600}
+.tag.new{background:var(--brand);color:var(--on-brand)}
+.tag.out{background:var(--chili);color:#fff}
+.fav{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.fav[aria-pressed="true"]{color:var(--chili)}
+.qbadge{position:absolute;left:10px;top:10px;background:var(--ink);color:var(--bg);font-size:12px;font-weight:700;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;padding:0 6px;z-index:1}
+
+.plate{flex:none;width:96px;height:96px;border-radius:50%;position:relative;box-shadow:inset 0 0 0 5px rgba(255,255,255,.55),inset 0 0 0 7px rgba(0,0,0,.06)}
+.plate.lg{width:min(220px,60vw);height:min(220px,60vw)}
+.empty{padding:40px 0;text-align:center;color:var(--muted)}
+
+/* Barra do pedido */
+.cartbar{position:fixed;left:0;right:0;bottom:0;z-index:25;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));padding-top:12px;pointer-events:none}
+.cartbar .wrap{display:flex;justify-content:center}
+.cartbtn{pointer-events:auto;display:flex;align-items:center;gap:14px;width:min(520px,100%);background:var(--brand);color:var(--on-brand);border-radius:18px;padding:14px 18px;box-shadow:var(--shadow);font-weight:700}
+.cartbtn .count{background:var(--on-brand);color:var(--brand);border-radius:8px;padding:2px 8px;font-variant-numeric:tabular-nums}
+.cartbtn .tot{margin-left:auto;font-family:var(--f-display);font-size:18px;font-variant-numeric:tabular-nums}
+.spacer{height:110px}
+
+/* Folhas e modais */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(8,14,11,.55);display:flex;align-items:flex-end;justify-content:center;animation:fade .18s ease}
+.sheet{background:var(--bg);width:min(640px,100%);max-height:92%;overflow:auto;border-radius:24px 24px 0 0;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));animation:up .24s cubic-bezier(.2,.8,.2,1)}
+@media (min-width:760px){.scrim{align-items:center}.sheet{border-radius:24px;max-height:88%}}
+.sheet-in{padding:18px max(18px,env(safe-area-inset-left,0px)) 0 max(18px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sheet-head h2{font-size:24px}
+.x{width:38px;height:38px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;flex:none}
+.hero{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding-top:6px}
+.hero h2{font-size:28px;font-weight:800}
+.hero p{margin:0;color:var(--muted);max-width:52ch}
+.facts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.group{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.group-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+.group-h b{font-size:15px}
+.req{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.req.bad{color:var(--chili)}
+.opt{display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid var(--line);cursor:pointer}
+.opt:first-of-type{border-top:0}
+.opt input{accent-color:var(--brand);width:18px;height:18px;flex:none}
+.opt span{flex:1}
+.opt em{font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums}
+textarea{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px;resize:vertical;min-height:64px}
+.pairs{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.pair{flex:none;width:150px;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;font-size:13px;font-weight:600}
+.pair .plate{width:56px;height:56px}
+.addrow{position:sticky;bottom:0;display:flex;gap:10px;align-items:center;background:var(--bg);padding-block:12px 4px}
+.stepper{display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px}
+.stepper button{width:36px;height:36px;border-radius:10px;font-size:20px;font-weight:600}
+.stepper button:hover{background:var(--surface-2)}
+.stepper b{min-width:22px;text-align:center;font-variant-numeric:tabular-nums}
+.stepper.sm button{width:28px;height:28px;font-size:16px}
+.primary{flex:1;background:var(--brand);color:var(--on-brand);border-radius:14px;padding:14px 16px;font-weight:700;display:flex;justify-content:space-between;gap:10px}
+.primary[disabled]{opacity:.5;cursor:not-allowed}
+.ghost{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;font-weight:600}
+
+.line{display:flex;gap:12px;align-items:flex-start;padding-block:12px;border-top:1px solid var(--line)}
+.line:first-child{border-top:0}
+.line .plate{width:48px;height:48px}
+.line .info{flex:1;min-width:0}
+.line .info b{display:block}
+.line .info small{display:block;color:var(--muted);font-size:12.5px}
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+.row.total{font-family:var(--f-display);font-weight:800;font-size:22px;padding-top:8px;border-top:1px dashed var(--line)}
+.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.inline input[type=text]{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px;text-transform:uppercase}
+.switch{display:flex;align-items:center;gap:10px;cursor:pointer}
+.switch input{accent-color:var(--brand);width:18px;height:18px}
+.ok{color:var(--ok);font-weight:600;font-size:13px}
+.bad{color:var(--chili);font-weight:600;font-size:13px}
+pre.msg{white-space:pre-wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13px;margin:0;max-height:220px;overflow:auto;user-select:all}
+
+/* Acompanhamento */
+.track{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.step{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--muted)}
+.step i{display:block;height:6px;border-radius:6px;background:var(--surface-2);overflow:hidden;position:relative}
+.step.done i{background:var(--ok)}
+.step.now i::after{content:"";position:absolute;inset:0;background:var(--accent);animation:load 1.4s ease-in-out infinite}
+.step.done,.step.now{color:var(--ink)}
+
+/* Quiz */
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.choice{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 8px;font-weight:700;text-align:center}
+.choice small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
+.choice[aria-pressed="true"]{border-color:var(--brand);box-shadow:inset 0 0 0 1.5px var(--brand)}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:600;box-shadow:var(--shadow);animation:up .2s ease;max-width:calc(100% - 32px);text-align:center}
+@keyframes up{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}}
+@keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:420px){.card .plate{width:78px;height:78px}.grid{grid-template-columns:1fr}.logo h1{font-size:21px}}
+.boot{padding:60px 16px;text-align:center;color:var(--muted)}
+.chefchip{flex:none;display:grid;place-items:center;border-radius:50%;background:#F4F1E0;box-shadow:inset 0 0 0 2px #6E1F1F22}
+.chefchip svg{width:100%;height:100%}
+.madeby{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:13px;padding-block:22px 4px}
+.madeby b{font-family:var(--f-display);font-weight:800;color:var(--ink);letter-spacing:.02em}
+.chefnote{display:flex;align-items:center;gap:12px}
+.chefnote p{margin:0}
+.ml-word{font-family:var(--f-display);font-weight:800;letter-spacing:.01em}
+.demobar{background:var(--ink);color:var(--bg);font-size:13.5px}
+.demobar .wrap{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;padding-block:8px}
+.demobar a,.demobar .linkbtn{color:inherit;font-weight:700;text-decoration:underline}
+.foot{display:flex;justify-content:center;padding-block:8px 0}
+.foot a,.linkbtn{color:var(--muted);font-size:13px;text-decoration:underline}
+
+/* Painel do restaurante */
+.ptop{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:18px 10px}
+.ptabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:8px}
+.ptabs::-webkit-scrollbar{display:none}
+.ptab{flex:none;padding:9px 14px;border-radius:10px;font-weight:600;color:var(--muted);display:flex;gap:6px;align-items:center}
+.ptab.on{background:var(--ink);color:var(--bg)}
+.ptab .dot{background:var(--chili);color:#fff;font-size:11px;border-radius:999px;padding:1px 7px;font-variant-numeric:tabular-nums}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding-block:6px 14px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.kpi small{display:block;color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.kpi b{font-family:var(--f-display);font-size:26px;font-variant-numeric:tabular-nums}
+.board{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:12px;overflow-x:auto;padding-bottom:12px}
+.col{background:var(--surface-2);border-radius:18px;padding:10px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col-h{display:flex;justify-content:space-between;align-items:center;padding:4px 6px;font-weight:700}
+.col-h span{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600}
+.ticket{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.ticket.st-novo{border-left-color:var(--accent)}
+.ticket.st-cozinha{border-left-color:var(--brand)}
+.ticket.st-pronto{border-left-color:var(--ok)}
+.ticket.late{border-left-color:var(--chili)}
+.ticket.fresh{animation:pulse 1.2s ease 3}
+@keyframes pulse{50%{box-shadow:0 0 0 4px var(--accent)}}
+.t-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.t-h b{font-family:var(--f-display);font-size:20px}
+.t-items{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.t-items small{display:block;color:var(--muted);font-size:12.5px}
+.t-items .obs{color:var(--chili);font-weight:600}
+.t-act{display:flex;gap:6px}
+.t-act .primary{padding:10px 12px}
+.t-act .ghost{padding:9px 12px;font-size:13px}
+.late-txt{color:var(--chili);font-weight:700}
+.calls{display:flex;flex-direction:column;gap:8px}
+.call{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.call b{font-family:var(--f-display);font-size:20px;min-width:72px}
+.call .what{flex:1}
+.mtable{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.mtable th,.mtable td{padding:10px 12px;border-top:1px solid var(--line);text-align:left;vertical-align:middle}
+.mtable th{border-top:0;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.mtable input[type=number]{width:96px;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:7px 8px;font-variant-numeric:tabular-nums}
+.mtable .cell-item{display:flex;align-items:center;gap:10px;min-width:180px}
+.mtable .plate{width:40px;height:40px}
+.tablewrap{overflow-x:auto}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:minmax(120px,1.2fr) 3fr auto;gap:10px;align-items:center;font-size:14px}
+.bar i{display:block;height:12px;border-radius:6px;background:var(--brand)}
+.hours{display:flex;align-items:flex-end;gap:4px;height:120px;padding-top:8px}
+.hours div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.hours i{display:block;width:100%;border-radius:4px 4px 0 0;background:var(--accent);min-height:2px}
+.qrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.qr{background:#fff;color:#14231B;border-radius:16px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;border:1px solid var(--line)}
+.qr svg{width:100%;height:auto;max-width:150px}
+.qr b{font-family:var(--f-display);font-size:18px}
+.qr small{font-size:10.5px;word-break:break-all;color:#56675D}
+.panel-sec{display:flex;flex-direction:column;gap:12px;padding-block:6px 30px}
+.panel-sec h2{font-size:22px}
+.note{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:12px 14px;color:var(--muted);font-size:13.5px}
+.state{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--surface-2)}
+.state.on{background:var(--ok);color:#fff}
+.ptabs.sub{padding-block:0 4px}
+.ptabs.sub .ptab{border:1px solid var(--line)}
+.dishcat{display:flex;flex-direction:column;gap:8px}
+.dishcat h3{font-size:16px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:8px}
+.dishrow{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px}
+.dishrow.off{opacity:.6}
+.dishrow .plate{width:64px;height:64px}
+.dishrow .info{min-width:0;display:flex;flex-direction:column;gap:4px}
+.dishact{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.ghost.sm{padding:6px 10px;font-size:13px;border-radius:10px}
+.ghost[disabled]{opacity:.45;cursor:not-allowed}
+@media (max-width:640px){.dishrow{grid-template-columns:auto 1fr}.dishact{grid-column:1 / -1;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between}}
+.catrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.catrow input[type=text]{flex:1;min-width:140px}
+.form{gap:8px}
+.form label:not(.switch){font-size:13px;font-weight:600;color:var(--muted)}
+.form input[type=text],.form input[type=number],.form select,.catrow input[type=text],.optline input,.grow,.optgroup input,.optgroup select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 10px;font:inherit;color:inherit}
+.grow{flex:1;min-width:0;width:auto}
+.form-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.form-2>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.selos{display:flex;flex-wrap:wrap;gap:8px}
+.selo{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-weight:600;font-size:13.5px}
+.selo small{font-weight:500;color:var(--muted);font-size:11.5px}
+.selo[aria-pressed="true"]{border-color:var(--brand);box-shadow:inset 0 0 0 1.5px var(--brand);background:var(--surface)}
+.selo.hit[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent);box-shadow:none}
+.selo.hit[aria-pressed="true"] small{color:inherit;opacity:.85}
+.selo[disabled]{opacity:.45;cursor:not-allowed}
+.optgroup{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.optline{display:grid;grid-template-columns:1fr 110px 38px;gap:8px;align-items:center}
+.photo-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.photo-row .plate.lg{width:120px;height:120px}
+.filebtn{cursor:pointer;display:inline-block}
+.primary.danger{background:var(--chili);color:#fff}
+.danger-t{color:var(--chili);border-color:var(--chili)}
+.hitnote{flex-wrap:wrap}
+.hitnote p{flex:1;min-width:200px}
+</style>
+</head>
+<body>
+
+<div id="app"><div class="boot">Carregando o cardápio…</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+const html = htm.bind(React.createElement);
+const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+const money = v => BRL.format(v);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+/* ---------- Dados do cardápio (exemplo) ---------- */
+/* O cardápio vem do banco: cada restaurante cadastra os próprios pratos no painel (#painel → Cardápio) */
+let RESTAURANT = { name: 'Seu restaurante', sub: '', sigla: '', whats: '', hhOn: false, hhStart: 17, hhEnd: 20, hhOff: 0.2 };
+let CATS = [];
+let ITEMS = [];
+let byId = {};
+const TAGS = { hit: 'Hit da casa', new: 'Novidade', veg: 'Vegetariano', vegan: 'Vegano', sg: 'Sem glúten', hot: 'Picante' };
+const TAG_CLASS = { hit: 'hit', new: 'new', hot: 'hot' };
+const catName = id => (CATS.find(c => c.id === id) || { name: 'Sem categoria' }).name;
+const DEFAULT_COLORS = [['#E8B04B', '#C57B2A', '#6E9B4A'], ['#E2574C', '#F2C14E', '#7BB662'], ['#8E3B2A', '#C9673E', '#E9C46A'], ['#F3D7A0', '#D9472B', '#F0C060'], ['#6D1F2F', '#A33B4E', '#E6C3C9'], ['#8CC063', '#F3A847', '#EAD9B0']];
+function toItem(id, d) {
+  return {
+    id, cat: d.cat || '', name: d.nome || 'Prato sem nome', desc: d.desc || '', price: Number(d.preco) || 0,
+    kcal: d.kcal || 0, prep: Number(d.prep) || 15, tags: Array.isArray(d.selos) ? d.selos : [], allergens: d.alergenos || '',
+    hunger: d.fome || 2, vibe: d.vibe || 'conforto', c: Array.isArray(d.cores) && d.cores.length === 3 ? d.cores : DEFAULT_COLORS[Math.abs([...id].reduce((a, ch) => a + ch.charCodeAt(0), 0)) % DEFAULT_COLORS.length],
+    soldOut: !!d.esgotado, hidden: d.ativo === false, noHH: !!d.semHH, ordem: Number(d.ordem) || 0,
+    foto: d.foto && typeof d.foto.url === 'string' ? d.foto.url : null, fotoId: d.foto && d.foto.id ? d.foto.id : null,
+    pairs: Array.isArray(d.combina) ? d.combina : [],
+    groups: (Array.isArray(d.grupos) ? d.grupos : []).map(g => ({ id: g.id, name: g.nome || 'Opções', min: Number(g.min) || 0, max: Math.max(1, Number(g.max) || 1), opts: (g.opcoes || []).map(o => [o.id, o.nome, Number(o.preco) || 0]) })),
+    raw: d,
+  };
+}
+const COUPONS = { BRASA10: { off: 0.10, label: '10% de desconto' }, PRIMEIRAVEZ: { off: 0.15, label: '15% de desconto' } };
+
+/* ---------- Regras de preço ---------- */
+const listPrice = item => item.price;
+const isOut = item => !!item.soldOut;
+const isHidden = item => !!item.hidden || !item.cat || !CATS.some(c => c.id === item.cat);
+function isHH(d = new Date()) { const h = d.getHours(); return RESTAURANT.hhOn && h >= RESTAURANT.hhStart && h < RESTAURANT.hhEnd; }
+function basePrice(item, hh) {
+  const cat = CATS.find(c => c.id === item.cat) || {}; const p = listPrice(item);
+  return hh && cat.hh && !item.noHH ? Math.round(p * (1 - RESTAURANT.hhOff) * 100) / 100 : p;
+}
+
+/* ---------- Banco compartilhado (cardápio ↔ painel) ---------- */
+/* ---------- Dados ----------
+   Nesta versão de demonstração os dados ficam no localStorage do navegador, começando com
+   os pratos de exemplo abaixo. A camada tem a mesma interface de um banco de documentos em
+   tempo real (doc/collection, set/update/delete, onSnapshot), então dá para trocar por um
+   backend de verdade sem mexer nas telas. */
+const DEMO_SEED = [{"op":"set","collection":"pratos","doc_id":"pastel","data":{"nome":"Pastéis de feira","desc":"Quatro pastéis crocantes de carne com azeitona e queijo com manjericão. Vem com vinagrete da casa.","preco":32,"cat":"entradas","ordem":0,"selos":["hit"],"prep":12,"kcal":520,"alergenos":"Glúten, lactose","fome":1,"vibe":"conforto","cores":["#E8B04B","#C57B2A","#6E9B4A"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["caipi","limonada"],"grupos":[{"id":"molho","nome":"Molho extra","min":0,"max":2,"opcoes":[{"id":"pimenta","nome":"Pimenta biquinho","preco":3},{"id":"alho","nome":"Maionese de alho","preco":3},{"id":"mel","nome":"Mel picante","preco":4}]}]}},{"op":"set","collection":"pratos","doc_id":"dadinho","data":{"nome":"Dadinho de tapioca","desc":"Cubos de tapioca com queijo coalho, crosta dourada e geleia de pimenta.","preco":29,"cat":"entradas","ordem":1,"selos":["veg","sg","hot"],"prep":10,"kcal":430,"alergenos":"Lactose","fome":1,"vibe":"ousado","cores":["#F3D7A0","#D9472B","#F0C060"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["caipi"],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"ceviche","data":{"nome":"Ceviche de caju","desc":"Caju marinado no leite de tigre com cebola roxa, coentro e chips de batata-doce.","preco":36,"cat":"entradas","ordem":2,"selos":["vegan","sg","new"],"prep":8,"kcal":280,"alergenos":"Nenhum","fome":1,"vibe":"fresco","cores":["#F6E3B4","#E2654B","#7BB662"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["tonica"],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"picanha","data":{"nome":"Picanha na brasa","desc":"300 g de picanha grelhada na lenha, farofa de banana, vinagrete e arroz biro-biro.","preco":89,"cat":"principais","ordem":3,"selos":["sg","hit"],"prep":25,"kcal":1150,"alergenos":"Ovo","fome":3,"vibe":"conforto","cores":["#8E3B2A","#C9673E","#E9C46A"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["vinho","chopp"],"grupos":[{"id":"ponto","nome":"Ponto da carne","min":1,"max":1,"opcoes":[{"id":"mal","nome":"Mal passado","preco":0},{"id":"ponto","nome":"Ao ponto","preco":0},{"id":"bem","nome":"Bem passado","preco":0}]},{"id":"extra","nome":"Acompanhamento extra","min":0,"max":3,"opcoes":[{"id":"mandioca","nome":"Mandioca frita","preco":12},{"id":"couve","nome":"Couve na manteiga","preco":9},{"id":"ovo","nome":"Ovo caipira","preco":5}]}]}},{"op":"set","collection":"pratos","doc_id":"moqueca","data":{"nome":"Moqueca de banana-da-terra","desc":"Banana-da-terra e palmito no leite de coco e dendê. Acompanha arroz e pirão.","preco":64,"cat":"principais","ordem":4,"selos":["vegan","sg"],"prep":22,"kcal":780,"alergenos":"Nenhum","fome":2,"vibe":"conforto","cores":["#E8A33D","#D35F2B","#3E8E52"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["limonada"],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"salmao","data":{"nome":"Salmão com crosta de castanha","desc":"Filé de salmão com crosta de castanha-do-pará, purê de mandioquinha e brócolis.","preco":82,"cat":"principais","ordem":5,"selos":["sg"],"prep":20,"kcal":690,"alergenos":"Peixe, castanhas, lactose","fome":2,"vibe":"fresco","cores":["#F08A5D","#F7D9A8","#5FA05A"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["vinho"],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"bowl","data":{"nome":"Bowl do quintal","desc":"Quinoa, abóbora assada, grão-de-bico crocante, folhas, abacate e molho tahine.","preco":48,"cat":"principais","ordem":6,"selos":["vegan","sg","new"],"prep":12,"kcal":540,"alergenos":"Gergelim","fome":2,"vibe":"fresco","cores":["#8CC063","#F3A847","#EAD9B0"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["tonica"],"grupos":[{"id":"prot","nome":"Turbinar","min":0,"max":1,"opcoes":[{"id":"tofu","nome":"Tofu grelhado","preco":9},{"id":"frango","nome":"Frango grelhado","preco":11}]}]}},{"op":"set","collection":"pratos","doc_id":"classico","data":{"nome":"Clássico da brasa","desc":"Blend de 180 g, cheddar inglês, cebola caramelizada e maionese defumada no brioche.","preco":46,"cat":"burgers","ordem":7,"selos":["hit"],"prep":18,"kcal":960,"alergenos":"Glúten, lactose, ovo","fome":3,"vibe":"conforto","cores":["#C98A3C","#7A3B22","#F2C14E"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["chopp","limonada"],"grupos":[{"id":"ponto","nome":"Ponto da carne","min":1,"max":1,"opcoes":[{"id":"mal","nome":"Mal passado","preco":0},{"id":"ponto","nome":"Ao ponto","preco":0},{"id":"bem","nome":"Bem passado","preco":0}]},{"id":"add","nome":"Adicionais","min":0,"max":4,"opcoes":[{"id":"bacon","nome":"Bacon","preco":7},{"id":"cheddar","nome":"Cheddar extra","preco":5},{"id":"ovo","nome":"Ovo","preco":4},{"id":"jalap","nome":"Jalapeño","preco":4}]},{"id":"lado","nome":"Acompanha","min":1,"max":1,"opcoes":[{"id":"fritas","nome":"Fritas","preco":0},{"id":"rustica","nome":"Batata rústica","preco":4},{"id":"salada","nome":"Salada verde","preco":0}]}]}},{"op":"set","collection":"pratos","doc_id":"fogo","data":{"nome":"Fogo no parquinho","desc":"Blend de 180 g, pepper jack, jalapeño, cebola crispy e molho de pimenta defumada.","preco":49,"cat":"burgers","ordem":8,"selos":["hot"],"prep":18,"kcal":1010,"alergenos":"Glúten, lactose","fome":3,"vibe":"ousado","cores":["#D9472B","#7A2A1A","#F2A541"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["chopp"],"grupos":[{"id":"ponto","nome":"Ponto da carne","min":1,"max":1,"opcoes":[{"id":"mal","nome":"Mal passado","preco":0},{"id":"ponto","nome":"Ao ponto","preco":0},{"id":"bem","nome":"Bem passado","preco":0}]},{"id":"lado","nome":"Acompanha","min":1,"max":1,"opcoes":[{"id":"fritas","nome":"Fritas","preco":0},{"id":"rustica","nome":"Batata rústica","preco":4}]}]}},{"op":"set","collection":"pratos","doc_id":"cogu","data":{"nome":"Burger de cogumelos","desc":"Hambúrguer de shiitake e feijão preto, queijo vegetal, rúcula e maionese de ervas.","preco":44,"cat":"burgers","ordem":9,"selos":["vegan"],"prep":15,"kcal":640,"alergenos":"Glúten, soja","fome":2,"vibe":"ousado","cores":["#6B4E3D","#A88B6A","#7FB069"],"esgotado":true,"ativo":true,"semHH":false,"foto":null,"combina":["tonica"],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"nhoque","data":{"nome":"Nhoque na manteiga de sálvia","desc":"Nhoque de batata feito na casa, manteiga noisette, sálvia e parmesão.","preco":58,"cat":"massas","ordem":10,"selos":["veg"],"prep":16,"kcal":720,"alergenos":"Glúten, lactose, ovo","fome":2,"vibe":"conforto","cores":["#F3E0B5","#C9A45C","#5E8B4F"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["vinho"],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"carbonara","data":{"nome":"Carbonara de pancetta","desc":"Espaguete, gema curada, pancetta crocante, pecorino e pimenta-do-reino moída na hora.","preco":62,"cat":"massas","ordem":11,"selos":["hit"],"prep":15,"kcal":880,"alergenos":"Glúten, lactose, ovo","fome":3,"vibe":"conforto","cores":["#F2D28A","#B5652F","#F7EBCB"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["vinho"],"grupos":[{"id":"massa","nome":"Massa","min":1,"max":1,"opcoes":[{"id":"esp","nome":"Espaguete","preco":0},{"id":"sg","nome":"Massa sem glúten","preco":6}]}]}},{"op":"set","collection":"pratos","doc_id":"petit","data":{"nome":"Petit gâteau de doce de leite","desc":"Bolinho quente com recheio cremoso e sorvete de creme.","preco":28,"cat":"sobremesas","ordem":12,"selos":["veg","hit"],"prep":12,"kcal":610,"alergenos":"Glúten, lactose, ovo","fome":2,"vibe":"conforto","cores":["#7A4A2A","#E7C38A","#F7EEDC"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["cafe"],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"pudim","data":{"nome":"Pudim de tapioca e coco","desc":"Pudim firme de tapioca com coco queimado e calda de rapadura.","preco":22,"cat":"sobremesas","ordem":13,"selos":["veg","sg"],"prep":4,"kcal":410,"alergenos":"Lactose, ovo","fome":1,"vibe":"conforto","cores":["#F7E7C4","#B87333","#FFF6E5"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":["cafe"],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"sorbet","data":{"nome":"Sorbet de cupuaçu","desc":"Duas bolas de sorbet de cupuaçu com farofa de castanha e hortelã.","preco":19,"cat":"sobremesas","ordem":14,"selos":["vegan","sg"],"prep":3,"kcal":220,"alergenos":"Castanhas","fome":1,"vibe":"fresco","cores":["#F6EBD2","#E9D18C","#7DBE6B"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":[],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"caipi","data":{"nome":"Caipirinha de caju com manjericão","desc":"Cachaça artesanal, caju, manjericão e limão. Também sai sem álcool.","preco":26,"cat":"bebidas","ordem":15,"selos":["vegan","sg","hit"],"prep":5,"kcal":210,"alergenos":"Nenhum","fome":1,"vibe":"ousado","cores":["#F5B942","#E2654B","#6AAE55"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":[],"grupos":[{"id":"base","nome":"Base","min":1,"max":1,"opcoes":[{"id":"cachaca","nome":"Cachaça","preco":0},{"id":"vodka","nome":"Vodka","preco":3},{"id":"zero","nome":"Sem álcool","preco":-6}]}]}},{"op":"set","collection":"pratos","doc_id":"chopp","data":{"nome":"Chopp da casa 400 ml","desc":"Pilsen leve e gelado, tirado na hora.","preco":16,"cat":"bebidas","ordem":16,"selos":["vegan"],"prep":2,"kcal":180,"alergenos":"Glúten","fome":1,"vibe":"conforto","cores":["#F2C14E","#FFF4D6","#E8A33D"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":[],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"vinho","data":{"nome":"Taça de tinto da Serra","desc":"Merlot gaúcho, frutado e macio. Taça de 150 ml.","preco":34,"cat":"bebidas","ordem":17,"selos":["vegan","sg"],"prep":2,"kcal":125,"alergenos":"Sulfitos","fome":1,"vibe":"conforto","cores":["#6D1F2F","#A33B4E","#E6C3C9"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":[],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"limonada","data":{"nome":"Limonada suíça","desc":"Limão batido com leite condensado, gelo e raspas.","preco":14,"cat":"bebidas","ordem":18,"selos":["veg","sg"],"prep":4,"kcal":240,"alergenos":"Lactose","fome":1,"vibe":"fresco","cores":["#D9EFA6","#F7F3DC","#8CC063"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":[],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"tonica","data":{"nome":"Tônica de hibisco","desc":"Água tônica, xarope de hibisco da casa e laranja. Sem álcool.","preco":15,"cat":"bebidas","ordem":19,"selos":["vegan","sg","new"],"prep":3,"kcal":90,"alergenos":"Nenhum","fome":1,"vibe":"fresco","cores":["#C2335B","#F3A6BE","#F7D38B"],"esgotado":false,"ativo":true,"semHH":false,"foto":null,"combina":[],"grupos":[]}},{"op":"set","collection":"pratos","doc_id":"cafe","data":{"nome":"Café coado de Minas","desc":"Grão especial do Sul de Minas, coado na hora.","preco":9,"cat":"bebidas","ordem":20,"selos":["vegan","sg"],"prep":3,"kcal":5,"alergenos":"Nenhum","fome":1,"vibe":"conforto","cores":["#4A2C1D","#8B5A3C","#E9D7C0"],"esgotado":false,"ativo":true,"semHH":true,"foto":null,"combina":[],"grupos":[]}},{"op":"set","collection":"config","doc_id":"menu","data":{"mesas":12,"cats":[{"id":"entradas","nome":"Entradas","hh":false},{"id":"principais","nome":"Principais","hh":false},{"id":"burgers","nome":"Burgers","hh":false},{"id":"massas","nome":"Massas","hh":false},{"id":"sobremesas","nome":"Sobremesas","hh":false},{"id":"bebidas","nome":"Bebidas","hh":true}],"restaurante":{"nome":"Brasa & Manjericão","sub":"Cozinha de brasa · aberto até 23h","sigla":"B&M","whats":"","hhOn":true,"hhInicio":17,"hhFim":20,"hhDesc":20}}}];
+const DEMO_KEY = 'mesalivre-demo-v1';
+const IS_DEMO = true;
+function createDemoDb() {
+  let data = null;
+  try { data = JSON.parse(localStorage.getItem(DEMO_KEY) || 'null'); } catch {}
+  if (!data) { data = {}; DEMO_SEED.forEach(w => { data[w.collection + '/' + w.doc_id] = w.data; }); }
+  const subs = new Set();
+  const save = () => { try { localStorage.setItem(DEMO_KEY, JSON.stringify(data)); } catch {} };
+  const notify = () => { save(); setTimeout(() => subs.forEach(f => f()), 0); };
+  const snap = (path) => ({ id: path.split('/').pop(), exists: !!data[path], data: () => data[path] ? JSON.parse(JSON.stringify(data[path])) : undefined, metadata: { fromCache: false, hasPendingWrites: false } });
+  const deepMerge = (a, b) => { const o = { ...a }; Object.keys(b).forEach(k => { o[k] = b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a[k] && typeof a[k] === 'object' && !Array.isArray(a[k]) ? deepMerge(a[k], b[k]) : b[k]; }); return o; };
+  const listen = f => { subs.add(f); setTimeout(f, 0); return () => subs.delete(f); };
+  function doc(path) {
+    return {
+      id: path.split('/').pop(), path,
+      async get() { return snap(path); },
+      async set(b) { data[path] = JSON.parse(JSON.stringify(b)); notify(); },
+      async update(b) { if (!data[path]) throw { code: 'invalid_argument' }; data[path] = deepMerge(data[path], JSON.parse(JSON.stringify(b))); notify(); },
+      async delete() { delete data[path]; notify(); },
+      onSnapshot(next) { return listen(() => next(snap(path))); },
+      collection(sub) { return collection(path + '/' + sub); },
+    };
+  }
+  function collection(path, q = {}) {
+    const depth = path.split('/').length + 1;
+    const run = () => {
+      let keys = Object.keys(data).filter(k => k.startsWith(path + '/') && k.split('/').length === depth);
+      let docs = keys.map(snap);
+      (q.where || []).forEach(([f, op, v]) => { docs = docs.filter(d => { const x = d.data()[f]; return op === '==' ? x === v : op === '!=' ? x !== v : op === '<' ? x < v : op === '<=' ? x <= v : op === '>' ? x > v : op === '>=' ? x >= v : true; }); });
+      if (q.f) docs.sort((a, b) => { const x = a.data()[q.f], y = b.data()[q.f]; return (x > y ? 1 : x < y ? -1 : 0) * (q.dir === 'desc' ? -1 : 1); });
+      else docs.sort((a, b) => a.id.localeCompare(b.id));
+      if (q.n) docs = docs.slice(0, q.n);
+      return { docs, size: docs.length, empty: !docs.length, metadata: { fromCache: false }, docChanges: () => [] };
+    };
+    return {
+      path,
+      doc(id) { return doc(path + '/' + (id || Math.random().toString(36).slice(2, 12))); },
+      async add(b) { const r = this.doc(); await r.set(b); return r; },
+      where(f, op, v) { return collection(path, { ...q, where: [...(q.where || []), [f, op, v]] }); },
+      orderBy(f, dir) { return collection(path, { ...q, f, dir }); },
+      limit(n) { return collection(path, { ...q, n }); },
+      async get() { return run(); },
+      onSnapshot(next) { return listen(() => next(run())); },
+    };
+  }
+  addEventListener('storage', e => { if (e.key === DEMO_KEY) { try { data = JSON.parse(e.newValue || '{}'); subs.forEach(f => f()); } catch {} } });
+  return { doc, collection };
+}
+const demoAssets = {
+  async upload(blob) {
+    const url = await new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = bad; r.readAsDataURL(blob); });
+    return { id: 'demo' + Math.random().toString(16).slice(2), url, sizeBytes: blob.size, contentType: blob.type };
+  },
+  async delete() { return { deleted: true }; },
+};
+function resetDemo() { try { localStorage.removeItem(DEMO_KEY); localStorage.removeItem('bm-my-orders'); localStorage.removeItem('bm-cart'); } catch {} location.hash = ''; location.reload(); }
+const DemoBar = () => IS_DEMO ? html`<div class="demobar"><div class="wrap"><span><b>Modo demonstração.</b> Pedidos e mudanças ficam só no seu navegador. Abra o <a href="#painel">painel do restaurante</a> para ver o outro lado.</span><button class="linkbtn" onClick=${resetDemo}>Recomeçar demo</button></div></div>` : null;
+
+const DEMO_DB = IS_DEMO ? createDemoDb() : null;
+function useCaps() {
+  const [caps, setCaps] = useState({ db: null, user: null, assets: null, ready: false, canEdit: false });
+  useEffect(() => { setCaps({ db: DEMO_DB, user: null, assets: demoAssets, ready: true, canEdit: true }); }, []);
+  return caps;
+}
+function useMenuData(db) {
+  const [state, setState] = useState({ cfgReady: false, itemsReady: false, slow: false, mesas: 12, cfg: null, rev: 0 });
+  useEffect(() => {
+    if (!db) return;
+    const timer = setTimeout(() => setState(s => ({ ...s, slow: true })), 10000);
+    const u1 = db.doc('config/menu').onSnapshot(snap => {
+      const d = snap.exists ? snap.data() : {};
+      const r = d.restaurante || {};
+      RESTAURANT = { name: r.nome || 'Seu restaurante', sub: r.sub || '', sigla: r.sigla || '', whats: (r.whats || '').replace(/\D/g, ''), hhOn: !!r.hhOn, hhStart: Number(r.hhInicio) || 17, hhEnd: Number(r.hhFim) || 20, hhOff: (Number(r.hhDesc) || 0) / 100 };
+      CATS = (Array.isArray(d.cats) ? d.cats : []).map(c => ({ id: c.id, name: c.nome, hh: !!c.hh }));
+      setState(s => ({ ...s, cfgReady: true, mesas: d.mesas || 12, cfg: d, rev: s.rev + 1 }));
+    }, () => setState(s => ({ ...s, cfgReady: true, slow: true })));
+    const u2 = db.collection('pratos').onSnapshot(snap => {
+      clearTimeout(timer);
+      const order = id => { const k = CATS.findIndex(c => c.id === id); return k < 0 ? 999 : k; };
+      ITEMS = snap.docs.map(x => toItem(x.id, x.data())).sort((a, b) => order(a.cat) - order(b.cat) || a.ordem - b.ordem || a.name.localeCompare(b.name));
+      byId = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+      setState(s => ({ ...s, itemsReady: true, slow: false, rev: s.rev + 1 }));
+    }, () => { clearTimeout(timer); setState(s => ({ ...s, itemsReady: true, slow: true })); });
+    return () => { clearTimeout(timer); u1(); u2(); };
+  }, [db]);
+  return { ...state, ready: state.cfgReady && state.itemsReady };
+}
+const STATUS = { novo: 'Novo', cozinha: 'Na cozinha', pronto: 'Pronto', entregue: 'Entregue', cancelado: 'Cancelado' };
+function optPrice(item, sel) {
+  let t = 0;
+  (item.groups || []).forEach(g => (sel[g.id] || []).forEach(o => { const f = g.opts.find(x => x[0] === o); if (f) t += f[2] || 0; }));
+  return t;
+}
+function optLabel(item, sel) {
+  const parts = [];
+  (item.groups || []).forEach(g => (sel[g.id] || []).forEach(o => { const f = g.opts.find(x => x[0] === o); if (f) parts.push(f[1]); }));
+  return parts.join(', ');
+}
+
+/* ---------- Pequenos componentes ---------- */
+function seeded(str) { let h = 2166136261; for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return () => ((h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0) % 1000) / 1000; }
+function plateStyle(item) {
+  const r = seeded(item.id); const [a, b, c] = item.c; const layers = [];
+  for (let i = 0; i < 7; i++) {
+    const col = [a, b, c][i % 3]; const x = 28 + r() * 44, y = 28 + r() * 44, s = 8 + r() * 16;
+    layers.push(`radial-gradient(circle at ${x}% ${y}%, ${col} 0 ${s}%, transparent ${s + 1}%)`);
+  }
+  layers.push(`radial-gradient(circle at 50% 50%, ${a}33 0 42%, transparent 43%)`);
+  layers.push('radial-gradient(circle at 50% 50%, #FBFAF6 0 60%, #ECEAE2 61% 100%)');
+  return { background: layers.join(',') };
+}
+const Plate = ({ item, cls = '' }) => item.foto
+  ? html`<div class=${'plate photo ' + cls} aria-hidden="true"><img src=${item.foto} alt="" loading="lazy" onError=${e => { e.target.style.display = 'none'; }}/></div>`
+  : html`<div class=${'plate ' + cls} style=${plateStyle(item)} aria-hidden="true"></div>`;
+const Heart = ({ on }) => html`<svg width="18" height="18" viewBox="0 0 24 24" fill=${on ? 'currentColor' : 'none'} stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-9.5-9.1C1.1 8.6 3.3 5 6.8 5c2 0 3.6 1.1 5.2 3 1.6-1.9 3.2-3 5.2-3 3.5 0 5.7 3.6 4.3 6.9C19.5 16.4 12 21 12 21z"/></svg>`;
+
+/* ---------- Chef Livre, mascote da MesaLivre ---------- */
+function chefMarkup(reduced) {
+  const o = '#6E1F1F', skin = '#F6D2B0', white = '#FFFDF7', coat = '#E2574C', paper = '#FFF6E2';
+  const head = `
+    <circle cx="40.5" cy="73" r="5" fill="${skin}" stroke="${o}" stroke-width="2.6"/><circle cx="79.5" cy="73" r="5" fill="${skin}" stroke="${o}" stroke-width="2.6"/>
+    <circle cx="60" cy="71" r="20" fill="${skin}" stroke="${o}" stroke-width="2.8"/>
+    <path d="M38 48 Q28 41 35 31 Q37 20 50 22 Q56 11 67 17 Q79 13 83 26 Q93 33 82 48 Z" fill="${white}" stroke="${o}" stroke-width="2.8" stroke-linejoin="round"/>
+    <rect x="40" y="45" width="40" height="10" rx="3.5" fill="${white}" stroke="${o}" stroke-width="2.8"/>
+    <path d="M50 30 Q52 36 51 42 M66 26 Q69 33 68 42" fill="none" stroke="${o}" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="52.5" cy="67" r="2.5" fill="${o}"/>
+    <path d="M64.5 67.5 Q67.5 64.5 70.5 67.5" fill="none" stroke="${o}" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M49 61.5 Q52.5 59.5 56 61.5 M64 61.5 Q67.5 59.5 71 61.5" fill="none" stroke="${o}" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="47" cy="75" r="3.4" fill="${coat}" opacity=".35"/><circle cx="73" cy="75" r="3.4" fill="${coat}" opacity=".35"/>
+    <path d="M47 78.5 Q53 72.5 60 76.5 Q67 72.5 73 78.5 Q67 82.5 60 79.5 Q53 82.5 47 78.5 Z" fill="${o}"/>
+    <path d="M55.5 84 Q60 87.5 64.5 84" fill="none" stroke="${o}" stroke-width="2.2" stroke-linecap="round"/>`;
+  const inner = reduced ? `<g transform="translate(60 60) scale(1.25) translate(-60 -54)">${head}</g>` : `
+    <path d="M27 119 Q28 95 52 91 L68 91 Q90 95 92 119 Z" fill="${coat}" stroke="${o}" stroke-width="2.8" stroke-linejoin="round"/>
+    <path d="M52 91 L60 101 L68 91" fill="${white}" stroke="${o}" stroke-width="2.4" stroke-linejoin="round"/>
+    <circle cx="60" cy="107" r="1.9" fill="${o}"/><circle cx="60" cy="114" r="1.9" fill="${o}"/>
+    <path d="M84 99 Q97 92 100 71" fill="none" stroke="${o}" stroke-width="12" stroke-linecap="round"/>
+    <path d="M84 99 Q97 92 100 71" fill="none" stroke="${coat}" stroke-width="6.6" stroke-linecap="round"/>
+    ${head}
+    <g transform="rotate(-10 101 44)"><rect x="86" y="21" width="31" height="42" rx="3.5" fill="${paper}" stroke="${o}" stroke-width="2.6"/>
+      <rect x="91" y="26.5" width="21" height="6" rx="2" fill="${coat}"/>
+      <path d="M91 39 H107 M91 45 H112 M91 51 H104 M91 57 H109" stroke="${o}" stroke-width="2" stroke-linecap="round"/></g>
+    <circle cx="100" cy="66" r="5.8" fill="${skin}" stroke="${o}" stroke-width="2.6"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-hidden="true">${inner}</svg>`;
+}
+const CHEF_HEAD = chefMarkup(true), CHEF_FULL = chefMarkup(false);
+const Chef = ({ size = 40, full = false }) => html`<span class="chefchip" style=${{ width: size, height: size }} dangerouslySetInnerHTML=${{ __html: full ? CHEF_FULL : CHEF_HEAD }}></span>`;
+const CHEF_LINES = ['Recebi seu pedido! Já passo pra cozinha.', 'Tá no fogo! Já já fica pronto.', 'Pronto! Saindo da cozinha agora.', 'Na mesa. Bom apetite!'];
+const Close = () => html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
+
+function Sheet({ onClose, children, label }) {
+  useEffect(() => {
+    const k = e => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', k); document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', k); document.body.style.overflow = ''; };
+  }, []);
+  return html`<div class="scrim" onClick=${e => e.target === e.currentTarget && onClose()}>
+    <div class="sheet" role="dialog" aria-modal="true" aria-label=${label}>${children}</div></div>`;
+}
+
+/* ---------- Detalhe do prato ---------- */
+function ItemSheet({ item, hh, onClose, onAdd, onOpen, edit }) {
+  const [sel, setSel] = useState(() => edit ? edit.sel : Object.fromEntries((item.groups || []).map(g => [g.id, g.min === 1 && g.max === 1 && g.id !== 'ponto' ? [g.opts[0][0]] : []])));
+  const [qty, setQty] = useState(edit ? edit.qty : 1);
+  const [note, setNote] = useState(edit ? edit.note : '');
+  const toggle = (g, o) => setSel(s => {
+    const cur = s[g.id] || [];
+    if (g.max === 1) return { ...s, [g.id]: [o] };
+    if (cur.includes(o)) return { ...s, [g.id]: cur.filter(x => x !== o) };
+    if (cur.length >= g.max) return s;
+    return { ...s, [g.id]: [...cur, o] };
+  });
+  const missing = (item.groups || []).filter(g => (sel[g.id] || []).length < g.min);
+  const unit = basePrice(item, hh) + optPrice(item, sel);
+  const pairs = (item.pairs || []).map(id => byId[id]).filter(Boolean);
+  return html`<${Sheet} onClose=${onClose} label=${item.name}>
+    <div class="sheet-in">
+      <div class="sheet-head"><span class="req">${catName(item.cat)}</span><button class="x" onClick=${onClose} aria-label="Fechar"><${Close}/></button></div>
+      <div class="hero">
+        <${Plate} item=${item} cls="lg"/>
+        <h2>${item.name}</h2>
+        <p>${item.desc}</p>
+        <div class="facts">
+          ${item.tags.map(t => html`<span key=${t} class=${'tag ' + (TAG_CLASS[t] || '')}>${TAGS[t]}</span>`)}
+          <span class="tag num">${item.prep} min</span><span class="tag num">${item.kcal} kcal</span>
+        </div>
+        <small class="muted">Alergênicos: ${item.allergens}</small>
+      </div>
+      ${(item.groups || []).map(g => {
+        const n = (sel[g.id] || []).length; const bad = n < g.min;
+        return html`<div class="group" key=${g.id}>
+          <div class="group-h"><b>${g.name}</b><span class=${'req' + (bad ? ' bad' : '')}>${g.min ? 'Obrigatório' : `Até ${g.max}`}</span></div>
+          ${g.opts.map(([oid, label, p = 0]) => html`<label class="opt" key=${oid}>
+            <input type=${g.max === 1 ? 'radio' : 'checkbox'} name=${item.id + g.id} id=${item.id + g.id + oid} checked=${(sel[g.id] || []).includes(oid)} onChange=${() => toggle(g, oid)}/>
+            <span>${label}</span>${p !== 0 && html`<em>${p > 0 ? '+ ' : '− '}${money(Math.abs(p))}</em>`}
+          </label>`)}
+        </div>`;
+      })}
+      <div class="group"><div class="group-h"><b>Alguma observação?</b><span class="req">Opcional</span></div>
+        <textarea id="note" maxlength="140" placeholder="Ex.: sem cebola, molho à parte" value=${note} onInput=${e => setNote(e.target.value)}></textarea></div>
+      ${pairs.length > 0 && html`<div><div class="group-h"><b>Combina com</b></div><div class="pairs">
+        ${pairs.map(p => html`<button class="pair" key=${p.id} onClick=${() => onOpen(p)}><${Plate} item=${p}/>${p.name}<span class="muted num">${money(basePrice(p, hh))}</span></button>`)}
+      </div></div>`}
+      <div class="addrow">
+        <div class="stepper"><button onClick=${() => setQty(q => Math.max(1, q - 1))} aria-label="Menos">−</button><b>${qty}</b><button onClick=${() => setQty(q => Math.min(20, q + 1))} aria-label="Mais">+</button></div>
+        <button class="primary" disabled=${isOut(item) || missing.length > 0} onClick=${() => onAdd({ id: item.id, sel, qty, note: note.trim() })}>
+          <span>${isOut(item) ? 'Esgotado hoje' : missing.length ? `Escolha: ${missing[0].name.toLowerCase()}` : edit ? 'Salvar alteração' : 'Adicionar'}</span><span class="num">${money(unit * qty)}</span>
+        </button>
+      </div>
+    </div>
+  <//>`;
+}
+
+/* ---------- Me ajuda a escolher ---------- */
+function QuizSheet({ onClose, onOpen, hh }) {
+  const [hunger, setHunger] = useState(null); const [vibe, setVibe] = useState(null); const [pick, setPick] = useState(null);
+  const roll = () => {
+    const lastC = CATS.length ? CATS[CATS.length - 1].id : null;
+    const pool0 = ITEMS.filter(i => !isOut(i) && !isHidden(i)); const pool = pool0.filter(i => i.cat !== lastC).length ? pool0.filter(i => i.cat !== lastC) : pool0;
+    if (!pool.length) return;
+    const scored = pool.map(i => ({ i, s: (i.hunger === hunger ? 2 : -Math.abs(i.hunger - hunger)) + (i.vibe === vibe ? 3 : 0) + Math.random() }));
+    scored.sort((a, b) => b.s - a.s);
+    const main = scored[0].i;
+    const lastCat = CATS.length ? CATS[CATS.length - 1].id : null;
+    const drink = byId[(main.pairs || []).find(p => byId[p] && byId[p].cat === lastCat && !isOut(byId[p]))] || ITEMS.find(i => i.cat === lastCat && i.id !== main.id && !isOut(i) && !isHidden(i));
+    setPick({ main, drink });
+  };
+  const H = [[1, 'Beliscar', 'algo leve'], [2, 'Fome boa', 'um prato'], [3, 'Faminto', 'capricha']];
+  const V = [['conforto', 'Conforto', 'comida de casa'], ['fresco', 'Fresquinho', 'leve e vivo'], ['ousado', 'Ousado', 'com pimenta']];
+  return html`<${Sheet} onClose=${onClose} label="Me ajuda a escolher"><div class="sheet-in">
+    <div class="sheet-head"><div class="chefnote"><${Chef} size=${48}/><div><h2>Me ajuda a escolher</h2><small class="muted">Duas perguntas e o Chef Livre monta seu combo</small></div></div><button class="x" onClick=${onClose} aria-label="Fechar"><${Close}/></button></div>
+    <div><b>Quanta fome?</b><div class="choices" style=${{ marginTop: 8 }}>${H.map(([v, l, s]) => html`<button key=${v} class="choice" aria-pressed=${hunger === v} onClick=${() => setHunger(v)}>${l}<small>${s}</small></button>`)}</div></div>
+    <div><b>Qual a vibe?</b><div class="choices" style=${{ marginTop: 8 }}>${V.map(([v, l, s]) => html`<button key=${v} class="choice" aria-pressed=${vibe === v} onClick=${() => setVibe(v)}>${l}<small>${s}</small></button>`)}</div></div>
+    <button class="primary" disabled=${!hunger || !vibe} onClick=${roll}><span>${pick ? 'Sortear outro' : 'Sugerir combinação'}</span><span>→</span></button>
+    ${pick && html`<div class="rows">
+      ${[pick.main, pick.drink].filter(Boolean).map(it => html`<button key=${it.id} class="card" onClick=${() => onOpen(it)}><${Plate} item=${it}/><div class="body"><h3>${it.name}</h3><p>${it.desc}</p><div class="meta"><span class="price">${money(basePrice(it, hh))}</span></div></div></button>`)}
+    </div>`}
+    <div style=${{ height: 4 }}></div>
+  </div><//>`;
+}
+
+/* ---------- Pedido ---------- */
+const STAGES = [['Recebido', 0], ['Na cozinha', 15], ['Pronto', 50], ['Na mesa', 75]];
+const STAGE_OF = { novo: 0, cozinha: 1, pronto: 2, entregue: 3, cancelado: -1 };
+function stageOf(order, now) {
+  if (order.live) return order.status in STAGE_OF ? STAGE_OF[order.status] : 0;
+  const s = (now - order.at) / 1000; let i = 0; STAGES.forEach((st, k) => { if (s >= st[1]) i = k; }); return i;
+}
+const stageLabel = (o, now) => { const s = stageOf(o, now); return s < 0 ? 'Cancelado' : STAGES[s][0]; };
+
+function buildMessage(table, lines, sums, coupon) {
+  const L = [`*Pedido – ${RESTAURANT.name}*`, `Mesa ${table}`, ''];
+  lines.forEach(l => { L.push(`${l.qty}x ${l.item.name} — ${money(l.unit * l.qty)}`); if (l.opts) L.push(`   ${l.opts}`); if (l.note) L.push(`   Obs.: ${l.note}`); });
+  L.push('', `Subtotal: ${money(sums.sub)}`);
+  if (sums.disc) L.push(`Cupom ${coupon}: −${money(sums.disc)}`);
+  if (sums.tip) L.push(`Serviço (10%): ${money(sums.tip)}`);
+  L.push(`*Total: ${money(sums.total)}*`);
+  return L.join('\n');
+}
+
+function CartSheet({ cart, hh, table, setTable, onQty, onEdit, onClose, onPlace, orders, now, onBill, sendErr, live }) {
+  const [sending, setSending] = useState(false);
+  const [tip, setTip] = useState(true); const [split, setSplit] = useState(1);
+  const [code, setCode] = useState(''); const [coupon, setCoupon] = useState(null); const [cErr, setCErr] = useState('');
+  const [review, setReview] = useState(false); const [copied, setCopied] = useState(false);
+  const lines = cart.map(l => { const item = byId[l.id]; return { ...l, item, unit: basePrice(item, hh) + optPrice(item, l.sel), opts: optLabel(item, l.sel) }; });
+  const sub = lines.reduce((a, l) => a + l.unit * l.qty, 0);
+  const disc = coupon ? Math.round(sub * COUPONS[coupon].off * 100) / 100 : 0;
+  const tipV = tip ? Math.round((sub - disc) * 0.10 * 100) / 100 : 0;
+  const total = sub - disc + tipV;
+  const sums = { sub, disc, tip: tipV, total };
+  const prep = lines.length ? Math.max(...lines.map(l => l.item.prep)) : 0;
+  const applyCoupon = () => { const c = code.trim().toUpperCase(); if (COUPONS[c]) { setCoupon(c); setCErr(''); } else { setCoupon(null); setCErr('Cupom não encontrado. Confira as letras e tente de novo.'); } };
+  const msg = buildMessage(table, lines, sums, coupon);
+  const copy = async () => { try { await navigator.clipboard.writeText(msg); setCopied(true); } catch { setCopied(false); const el = document.getElementById('msgbox'); if (el) { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } } };
+  const placed = orders.length > 0;
+  return html`<${Sheet} onClose=${onClose} label="Seu pedido"><div class="sheet-in">
+    <div class="sheet-head"><h2>${review ? 'Confirmar pedido' : 'Seu pedido'}</h2><button class="x" onClick=${onClose} aria-label="Fechar"><${Close}/></button></div>
+
+    ${orders.map(o => { const st = stageOf(o, now); return html`<div class="track" key=${o.id}>
+      ${st >= 0 && html`<div class="chefnote"><${Chef} size=${44} full=${st < 3}/><p><b>Chef Livre:</b> ${CHEF_LINES[st]}</p></div>`}<div class="row"><b>Pedido #${o.num || o.id}</b><span class="muted num">${money(o.total)}</span></div>
+      ${st < 0 ? html`<span class="bad">O restaurante cancelou este pedido. Chame o garçom se tiver dúvida.</span>` : html`
+      <div class="steps">${STAGES.map((s, k) => html`<div key=${k} class=${'step ' + (k < st || st === 3 ? 'done' : k === st ? 'now' : '')}><i></i>${s[0]}</div>`)}</div>
+      <small class="muted">${st === 3 ? 'Bom apetite!' : `Previsão: cerca de ${o.prep} min${o.live ? ' · atualizado pela cozinha' : ''}`}</small>`}
+    </div>`; })}
+    ${sendErr && html`<span class="bad">${sendErr}</span>`}
+
+    ${lines.length === 0 ? html`<div class="empty">${placed ? 'Quer pedir mais alguma coisa? É só escolher no cardápio.' : 'Seu pedido está vazio. Toque num prato para começar.'}</div>
+      ${placed && html`<button class="ghost" onClick=${onBill}>Pedir a conta</button>`}` : !review ? html`
+      <div class="group" style=${{ padding: '4px 14px' }}>
+        ${lines.map(l => html`<div class="line" key=${l.key}>
+          <${Plate} item=${l.item}/>
+          <div class="info"><b>${l.item.name}</b>${l.opts && html`<small>${l.opts}</small>`}${l.note && html`<small>Obs.: ${l.note}</small>`}
+            <button class="muted" style=${{ fontSize: 12.5, textDecoration: 'underline', padding: 0, marginTop: 4 }} onClick=${() => onEdit(l)}>Editar</button></div>
+          <div style=${{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+            <span class="price" style=${{ fontSize: 15 }}>${money(l.unit * l.qty)}</span>
+            <div class="stepper sm"><button onClick=${() => onQty(l.key, -1)} aria-label="Menos">−</button><b>${l.qty}</b><button onClick=${() => onQty(l.key, 1)} aria-label="Mais">+</button></div>
+          </div>
+        </div>`)}
+      </div>
+      <div class="group">
+        <div class="group-h"><b>Cupom</b>${coupon && html`<span class="ok">${COUPONS[coupon].label} aplicado</span>`}</div>
+        <div class="inline"><input type="text" id="coupon" placeholder="Ex.: BRASA10" value=${code} onInput=${e => setCode(e.target.value)} onKeyDown=${e => e.key === 'Enter' && applyCoupon()}/><button class="ghost" onClick=${applyCoupon}>Aplicar</button></div>
+        ${cErr && html`<span class="bad">${cErr}</span>`}
+      </div>
+      <div class="group">
+        <label class="switch"><input type="checkbox" id="tip" checked=${tip} onChange=${e => setTip(e.target.checked)}/>Incluir serviço de 10% (opcional)</label>
+        <div class="inline" style=${{ justifyContent: 'space-between', marginTop: 6 }}><span>Dividir a conta</span>
+          <div class="stepper sm"><button onClick=${() => setSplit(s => Math.max(1, s - 1))} aria-label="Menos pessoas">−</button><b>${split}</b><button onClick=${() => setSplit(s => Math.min(20, s + 1))} aria-label="Mais pessoas">+</button></div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="muted">Subtotal</span><span>${money(sub)}</span></div>
+        ${disc > 0 && html`<div class="row"><span class="muted">Cupom ${coupon}</span><span class="ok">− ${money(disc)}</span></div>`}
+        ${tip && html`<div class="row"><span class="muted">Serviço</span><span>${money(tipV)}</span></div>`}
+        <div class="row total"><span>Total</span><span>${money(total)}</span></div>
+        ${split > 1 && html`<div class="row"><span class="muted">${split} pessoas</span><b>${money(total / split)} cada</b></div>`}
+        <small class="muted">Fica pronto em cerca de ${prep} min.</small>
+      </div>
+      <div class="addrow"><button class="primary" onClick=${() => setReview(true)}><span>Revisar pedido</span><span class="num">${money(total)}</span></button></div>
+    ` : html`
+      <div class="group"><div class="group-h"><b>Número da mesa</b></div>
+        <div class="inline"><input type="text" id="table" inputmode="numeric" value=${table} onInput=${e => setTable(e.target.value.replace(/\D/g, '').slice(0, 3))} style=${{ textTransform: 'none' }}/></div>
+        ${!table && html`<span class="bad">Informe a mesa para a cozinha saber onde entregar.</span>`}
+      </div>
+      <div class="group"><div class="group-h"><b>Mensagem para o garçom</b><span class="req">WhatsApp</span></div>
+        <pre class="msg" id="msgbox">${msg}</pre>
+        <div class="inline"><button class="ghost" onClick=${copy}>${copied ? 'Copiado' : 'Copiar texto'}</button>
+          ${RESTAURANT.whats && html`<a class="ghost" style=${{ textDecoration: 'none', color: 'inherit' }} href=${`https://wa.me/${RESTAURANT.whats}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener">Abrir no WhatsApp</a>`}</div>
+        <small class="muted">${live ? 'O botão abaixo manda o pedido direto para o painel da cozinha. O WhatsApp fica como alternativa (número de demonstração).' : 'Demonstração: o número do WhatsApp é fictício e o envio para a cozinha é simulado.'}</small>
+      </div>
+      <div class="addrow"><button class="ghost" onClick=${() => setReview(false)}>Voltar</button>
+        <button class="primary" disabled=${!table || sending} onClick=${async () => {
+          setSending(true);
+          const ok = await onPlace({ total, prep, sums, coupon, itens: lines.map(l => ({ id: l.id, nome: l.item.name, qtd: l.qty, opcoes: l.opts || '', obs: l.note || '', valor: Math.round(l.unit * l.qty * 100) / 100 })) });
+          setSending(false); if (ok) setReview(false);
+        }}><span>${sending ? 'Enviando…' : 'Enviar para a cozinha'}</span><span class="num">${money(total)}</span></button></div>
+    `}
+  </div><//>`;
+}
+
+/* ---------- App ---------- */
+const mesaFromHash = () => { const m = /^#mesa-(\d{1,3})$/.exec(location.hash); return m ? m[1] : null; };
+
+function MenuApp({ caps, config }) {
+  const db = caps.db;
+  const [query, setQuery] = useState('');
+  const [filters, setFilters] = useState([]);
+  const [onlyFav, setOnlyFav] = useState(false);
+  const [sort, setSort] = useState('rel');
+  const [active, setActive] = useState(null);
+  const [open, setOpen] = useState(null); // {item, edit}
+  const [cartAll, setCart] = useState(() => store.get('bm-cart', []));
+  const cart = config.ready ? cartAll.filter(l => byId[l.id]) : [];
+  const [cartOpen, setCartOpen] = useState(false);
+  const [quiz, setQuiz] = useState(false);
+  const [favs, setFavs] = useState(() => store.get('bm-favs', ['picanha']));
+  const [table, setTable] = useState(() => mesaFromHash() || store.get('bm-table', '12'));
+  const [localOrders, setLocalOrders] = useState([]);
+  const [myIds, setMyIds] = useState(() => store.get('bm-my-orders', []).filter(m => Date.now() - m.at < 12 * 3600e3));
+  const [liveMap, setLiveMap] = useState({});
+  const [sendErr, setSendErr] = useState('');
+  useEffect(() => store.set('bm-my-orders', myIds), [myIds]);
+  useEffect(() => { const f = () => { const m = mesaFromHash(); if (m) setTable(m); }; addEventListener('hashchange', f); return () => removeEventListener('hashchange', f); }, []);
+  const idsKey = myIds.map(m => m.id).join();
+  useEffect(() => {
+    if (!db || !idsKey) return;
+    const unsubs = idsKey.split(',').map(id => db.doc('pedidos/' + id).onSnapshot(s => {
+      if (s.exists) setLiveMap(m => ({ ...m, [id]: s.data() }));
+    }, () => {}));
+    return () => unsubs.forEach(u => u());
+  }, [db, idsKey]);
+  const orders = db ? myIds.filter(m => liveMap[m.id]).map(m => ({ ...liveMap[m.id], id: m.id, live: true })) : localOrders;
+  const [now, setNow] = useState(Date.now());
+  const [toast, setToast] = useState('');
+  const [waiterAt, setWaiterAt] = useState(0);
+  const [theme, setTheme] = useState(() => store.get('bm-theme', null));
+  const hh = isHH(new Date(now));
+
+  useEffect(() => store.set('bm-cart', cartAll), [cartAll]);
+  useEffect(() => store.set('bm-favs', favs), [favs]);
+  useEffect(() => store.set('bm-table', table), [table]);
+  useEffect(() => { if (theme) document.documentElement.dataset.theme = theme; else delete document.documentElement.dataset.theme; store.set('bm-theme', theme); }, [theme]);
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const say = useCallback(m => { setToast(m); clearTimeout(say.t); say.t = setTimeout(() => setToast(''), 2600); }, []);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+    let list = ITEMS.filter(i => {
+      const hay = (i.name + ' ' + i.desc).toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+      return !isHidden(i) && (!q || hay.includes(q)) && filters.every(f => i.tags.includes(f) || (f === 'veg' && i.tags.includes('vegan'))) && (!onlyFav || favs.includes(i.id));
+    });
+    if (sort === 'asc') list = [...list].sort((a, b) => basePrice(a, hh) - basePrice(b, hh));
+    if (sort === 'desc') list = [...list].sort((a, b) => basePrice(b, hh) - basePrice(a, hh));
+    if (sort === 'prep') list = [...list].sort((a, b) => a.prep - b.prep);
+    return list;
+  }, [query, filters, onlyFav, favs, sort, hh, config.rev]);
+  const grouped = CATS.map(c => ({ ...c, items: visible.filter(i => i.cat === c.id) })).filter(c => c.items.length);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(es => { es.forEach(e => e.isIntersecting && setActive(e.target.dataset.cat)); }, { rootMargin: '-90px 0px -65% 0px' });
+    document.querySelectorAll('section.catsec').forEach(s => obs.observe(s));
+    return () => obs.disconnect();
+  }, [grouped.map(g => g.id).join()]);
+
+  const qtyOf = id => cart.filter(l => l.id === id).reduce((a, l) => a + l.qty, 0);
+  const count = cart.reduce((a, l) => a + l.qty, 0);
+  const total = cart.reduce((a, l) => { const it = byId[l.id]; return a + (basePrice(it, hh) + optPrice(it, l.sel)) * l.qty; }, 0);
+
+  const add = (entry, editKey) => {
+    setCart(c => {
+      if (editKey) return c.map(l => l.key === editKey ? { ...l, ...entry } : l);
+      const sig = entry.id + JSON.stringify(entry.sel) + entry.note;
+      const ex = c.find(l => l.id + JSON.stringify(l.sel) + l.note === sig);
+      if (ex) return c.map(l => l === ex ? { ...l, qty: l.qty + entry.qty } : l);
+      return [...c, { ...entry, key: Math.random().toString(36).slice(2, 9) }];
+    });
+    setOpen(null);
+    say(editKey ? 'Item atualizado' : `${byId[entry.id].name} no pedido`);
+  };
+  const onQty = (key, d) => setCart(c => c.flatMap(l => l.key !== key ? [l] : l.qty + d <= 0 ? [] : [{ ...l, qty: l.qty + d }]));
+  const toggleFav = (e, id) => { e.stopPropagation(); setFavs(f => f.includes(id) ? f.filter(x => x !== id) : [...f, id]); };
+  const place = async o => {
+    setSendErr('');
+    const at = Date.now(); const num = String(at).slice(-4);
+    if (!db) { setLocalOrders(l => [...l, { id: num, num, total: o.total, prep: o.prep, at }]); setCart([]); say('Pedido enviado (simulação)'); return true; }
+    const ref = db.collection('pedidos').doc();
+    const body = { num, mesa: table, itens: o.itens, subtotal: o.sums.sub, desconto: o.sums.disc, servico: o.sums.tip, total: Math.round(o.total * 100) / 100, cupom: o.coupon || '', prep: o.prep, status: 'novo', criadoEm: at };
+    try {
+      await ref.set(body);
+      setLiveMap(m => ({ ...m, [ref.id]: body })); setMyIds(ids => [...ids, { id: ref.id, at }]);
+      setCart([]); say('Pedido enviado para a cozinha'); return true;
+    } catch (e) {
+      setSendErr(e && (e.code === 'permission_denied' || e.code === 'not_granted')
+        ? 'Seu acesso a esta página não permite enviar pedidos. Peça ao restaurante acesso de colaborador ou chame o garçom.'
+        : 'Não deu para enviar agora. Confira a internet e tente de novo, ou chame o garçom.');
+      return false;
+    }
+  };
+  const chamar = async tipo => {
+    if (!db) return true;
+    try { await db.collection('chamados').add({ mesa: table || '?', tipo, em: Date.now(), resolvido: false }); return true; }
+    catch { say('Não deu para avisar a equipe. Tente de novo em instantes.'); return false; }
+  };
+  const waiterWait = Math.max(0, 60 - Math.floor((now - waiterAt) / 1000));
+  const callWaiter = async () => { if (await chamar('garcom')) { setWaiterAt(Date.now()); say(`Garçom chamado para a mesa ${table || '—'}`); } };
+
+  const d = new Date(now); const pad = n => String(n).padStart(2, '0');
+  const target = new Date(d); if (hh) target.setHours(RESTAURANT.hhEnd, 0, 0, 0); else { target.setHours(RESTAURANT.hhStart, 0, 0, 0); if (d.getHours() >= RESTAURANT.hhEnd) target.setDate(target.getDate() + 1); }
+  const left = Math.max(0, Math.floor((target - d) / 1000));
+  const clock = `${pad(Math.floor(left / 3600))}:${pad(Math.floor(left % 3600 / 60))}:${pad(left % 60)}`;
+  const dark = theme ? theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  const shown = ITEMS.filter(i => !isHidden(i) && !isOut(i));
+  const hitPick = shown.find(i => i.tags.includes('hit')), newPick = shown.find(i => i.tags.includes('new') && i !== hitPick);
+  const off = Math.round(RESTAURANT.hhOff * 100);
+  const initials = RESTAURANT.sigla || RESTAURANT.name.split(/\s+/).filter(w => w.length > 2).map(w => w[0]).join('').slice(0, 3).toUpperCase();
+
+  return html`
+    <header class="wrap top">
+      <div class="toprow">
+        <div class="logo"><div class="mark">${initials}</div><div><h1>${RESTAURANT.name}</h1>${RESTAURANT.sub && html`<small>${RESTAURANT.sub}</small>`}</div></div>
+        <div class="actions">
+          <span class="pill table-tag">Mesa ${table || '—'}</span>
+          <button class="pill" onClick=${callWaiter} disabled=${waiterWait > 0 && waiterAt > 0}>${waiterWait > 0 && waiterAt > 0 ? `Garçom a caminho · ${waiterWait}s` : 'Chamar garçom'}</button>
+          <button class="pill" onClick=${() => setTheme(dark ? 'light' : 'dark')} aria-label="Alternar tema">${dark ? 'Claro' : 'Escuro'}</button>
+        </div>
+      </div>
+      ${RESTAURANT.hhOn && off > 0 && CATS.some(c => c.hh) && html`<div class="hh">
+        <div><b>${hh ? 'Happy hour rolando' : `Happy hour das ${RESTAURANT.hhStart}h às ${RESTAURANT.hhEnd}h`}</b><div style=${{ fontSize: 13 }}>${CATS.filter(c => c.hh).map(c => c.name).join(', ')} com ${off}% de desconto${hh ? ', preços já atualizados' : ''}</div></div>
+        <div class="clock" aria-label=${hh ? 'Termina em' : 'Começa em'}><span style=${{ fontSize: 12, fontFamily: 'var(--f-body)', fontWeight: 600, marginRight: 6 }}>${hh ? 'termina em' : 'começa em'}</span>${clock}</div>
+      </div>`}
+      <div class="tools">
+        <label class="search" for="q"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5" stroke-linecap="round"/></svg>
+          <input id="q" type="search" placeholder="Buscar prato, ingrediente…" value=${query} onInput=${e => setQuery(e.target.value)}/></label>
+        <div class="chips">
+          <button class="chip" aria-pressed=${onlyFav} onClick=${() => setOnlyFav(v => !v)}>Favoritos ${favs.length ? `(${favs.length})` : ''}</button>
+          ${['hit', 'veg', 'vegan', 'sg', 'hot', 'new'].map(t => html`<button key=${t} class="chip" aria-pressed=${filters.includes(t)} onClick=${() => setFilters(f => f.includes(t) ? f.filter(x => x !== t) : [...f, t])}>${TAGS[t]}</button>`)}
+          <select class="sort" id="sort" value=${sort} onChange=${e => setSort(e.target.value)} aria-label="Ordenar">
+            <option value="rel">Ordem da casa</option><option value="asc">Menor preço</option><option value="desc">Maior preço</option><option value="prep">Mais rápido</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <nav class="catbar"><div class="wrap cats">
+      ${grouped.map(c => html`<button key=${c.id} class=${'cat' + (active === c.id ? ' on' : '')} onClick=${() => document.getElementById('cat-' + c.id).scrollIntoView({ behavior: 'smooth' })}>${c.name}<span class="n">${c.items.length}</span></button>`)}
+    </div></nav>
+
+    <main class="wrap">
+      ${!caps.ready ? html`<div class="empty">Carregando o cardápio…</div>`
+        : !config.ready ? html`<div class="empty">${config.slow ? 'O cardápio está demorando para carregar. Confira a internet.' : 'Carregando o cardápio…'}</div>`
+        : ITEMS.filter(i => !isHidden(i)).length === 0 ? html`<div class="note chefnote" style=${{ marginTop: 16 }}><${Chef} size=${72} full=${true}/><p>${caps.canEdit ? html`O cardápio ainda está vazio. <a href="#painel">Abra o painel</a> e cadastre as categorias e os primeiros pratos.` : 'O restaurante ainda está montando o cardápio. Volte daqui a pouco.'}</p></div>` : ''}
+      ${config.ready && ITEMS.length > 0 && !query && !filters.length && !onlyFav && html`<div class="featured">
+        ${hitPick && html`<button class="feat" onClick=${() => setOpen({ item: hitPick })}><${Plate} item=${hitPick}/><div><small>Hit da casa</small><h3>${hitPick.name}</h3><span class="num">${money(basePrice(hitPick, hh))}</span></div></button>`}
+        ${newPick && html`<button class="feat alt" onClick=${() => setOpen({ item: newPick })}><${Plate} item=${newPick}/><div><small>Novidade</small><h3>${newPick.name}</h3><span class="num">${money(basePrice(newPick, hh))}</span></div></button>`}
+        <button class="feat quiz" onClick=${() => setQuiz(true)}><${Chef} size=${64} full=${true}/><div><small>Na dúvida?</small><h3>Me ajuda a escolher</h3><span style=${{ fontSize: 13, opacity: .8 }}>Duas perguntas e a gente monta seu combo</span></div></button>
+      </div>`}
+
+      ${config.ready && ITEMS.length > 0 && grouped.length === 0 && html`<div class="empty">Nenhum prato encontrado. Tente outra palavra ou tire algum filtro.</div>`}
+      ${grouped.map(c => html`<section class="catsec" key=${c.id} id=${'cat-' + c.id} data-cat=${c.id}>
+        <h2>${c.name}${c.hh && hh && html`<span>${off}% off no happy hour</span>`}</h2>
+        <div class="grid">
+          ${c.items.map(i => { const q = qtyOf(i.id); const p = basePrice(i, hh); const fav = favs.includes(i.id);
+            return html`<div key=${i.id} class=${'card' + (isOut(i) ? ' out' : '')} role="button" tabindex="0" onClick=${() => setOpen({ item: i })} onKeyDown=${e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setOpen({ item: i }))}>
+              ${q > 0 && html`<span class="qbadge num">${q}</span>`}
+              <${Plate} item=${i}/>
+              <div class="body">
+                <h3>${i.name}</h3><p>${i.desc}</p>
+                <div class="meta">
+                  <span class="price">${p !== listPrice(i) && html`<s>${money(listPrice(i))}</s>`}${money(p)}</span>
+                  ${isOut(i) ? html`<span class="tag out">Esgotado</span>` : i.tags.filter(t => ['hit', 'new', 'hot', 'vegan', 'sg', 'veg'].includes(t)).slice(0, 2).map(t => html`<span key=${t} class=${'tag ' + (TAG_CLASS[t] || '')}>${TAGS[t]}</span>`)}
+                  <span class="tag num">${i.prep} min</span>
+                </div>
+              </div>
+              <button class="fav" aria-pressed=${fav} aria-label=${fav ? 'Tirar dos favoritos' : 'Favoritar'} onClick=${e => toggleFav(e, i.id)}><${Heart} on=${fav}/></button>
+            </div>`; })}
+        </div>
+      </section>`)}
+      <div class="madeby"><${Chef} size=${28}/><span>Cardápio digital por <b>MESALIVRE</b></span></div>
+      ${caps.canEdit && html`<div class="foot"><a href="#painel">Abrir painel do restaurante</a></div>`}
+      <div class="spacer"></div>
+    </main>
+
+    ${(count > 0 || orders.length > 0) && html`<div class="cartbar"><div class="wrap"><button class="cartbtn" onClick=${() => setCartOpen(true)}>
+      ${count > 0 ? html`<span class="count">${count}</span><span>Ver pedido</span><span class="tot">${money(total)}</span>` : html`<span>Acompanhar pedido #${orders[orders.length - 1].num || orders[orders.length - 1].id}</span><span class="tot">${stageLabel(orders[orders.length - 1], now)}</span>`}
+    </button></div></div>`}
+
+    ${open && html`<${ItemSheet} key=${open.item.id + (open.edit ? open.edit.key : '')} item=${open.item} edit=${open.edit} hh=${hh} onClose=${() => setOpen(null)} onOpen=${it => setOpen({ item: it })} onAdd=${e => add(e, open.edit && open.edit.key)}/>`}
+    ${quiz && html`<${QuizSheet} hh=${hh} onClose=${() => setQuiz(false)} onOpen=${it => { setQuiz(false); setOpen({ item: it }); }}/>`}
+    ${cartOpen && html`<${CartSheet} cart=${cart} hh=${hh} table=${table} setTable=${setTable} orders=${orders} now=${now}
+      onQty=${onQty} onClose=${() => setCartOpen(false)} onEdit=${l => { setCartOpen(false); setOpen({ item: byId[l.id], edit: l }); }}
+      onPlace=${place} sendErr=${sendErr} live=${!!db} onBill=${async () => { if (await chamar('conta')) { say(`Conta solicitada para a mesa ${table}`); setCartOpen(false); } }}/>`}
+    ${toast && html`<div class="toast" role="status">${toast}</div>`}
+  `;
+}
+
+/* ================= Painel do restaurante (#painel) ================= */
+const mmss = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+const startOfDay = t => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
+
+function useThemeToggle() {
+  const [theme, setTheme] = useState(() => store.get('bm-theme', null));
+  useEffect(() => { if (theme) document.documentElement.dataset.theme = theme; else delete document.documentElement.dataset.theme; store.set('bm-theme', theme); }, [theme]);
+  const dark = theme ? theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  return [dark, () => setTheme(dark ? 'light' : 'dark')];
+}
+
+function Ticket({ o, now, onMove, onCancel, fresh }) {
+  const [confirm, setConfirm] = useState(false);
+  const age = now - o.criadoEm; const late = (o.status === 'novo' || o.status === 'cozinha') && age > (o.prep + 5) * 60e3;
+  const next = { novo: ['cozinha', 'Começar preparo'], cozinha: ['pronto', 'Marcar pronto'], pronto: ['entregue', 'Entregue na mesa'] }[o.status];
+  return html`<article class=${`ticket st-${o.status}${late ? ' late' : ''}${fresh ? ' fresh' : ''}`}>
+    <div class="t-h"><b>Mesa ${o.mesa}</b><span class=${'num ' + (late ? 'late-txt' : 'muted')}>#${o.num} · ${mmss(age)}</span></div>
+    <ul class="t-items">${(o.itens || []).map((it, k) => html`<li key=${k}><b>${it.qtd}×</b> ${it.nome}${it.opcoes && html`<small>${it.opcoes}</small>`}${it.obs && html`<small class="obs">Obs.: ${it.obs}</small>`}</li>`)}</ul>
+    <div class="row"><span class="muted">${late ? html`<span class="late-txt">Atrasado</span>` : `Meta: ${o.prep} min`}</span><span class="num">${money(o.total || 0)}</span></div>
+    ${o.status !== 'entregue' && o.status !== 'cancelado' && (confirm
+      ? html`<div class="t-act"><button class="ghost" onClick=${() => setConfirm(false)}>Manter</button><button class="primary" style=${{ background: 'var(--chili)', color: '#fff' }} onClick=${() => onCancel(o)}><span>Cancelar pedido</span></button></div>`
+      : html`<div class="t-act">${next && html`<button class="primary" onClick=${() => onMove(o, next[0])}><span>${next[1]}</span><span>→</span></button>`}<button class="ghost" onClick=${() => setConfirm(true)} aria-label="Cancelar pedido">Cancelar</button></div>`)}
+  </article>`;
+}
+
+/* ================= Cadastro do cardápio (painel → Cardápio) ================= */
+const slug = t => (t || 'item').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 24) || 'item';
+const rid = () => Math.random().toString(36).slice(2, 7);
+const toNum = v => { const n = Number(String(v).replace(',', '.')); return isFinite(n) ? n : NaN; };
+const TAG_HELP = { hit: 'o prato que mais sai ou mais recebe elogios', new: 'acabou de entrar no cardápio' };
+const GROUP_TYPES = [['req1', 'Escolher 1 (obrigatório)', 1, 1], ['opt1', 'Escolher 1 (opcional)', 0, 1], ['multi', 'Escolher vários (opcional)', 0, 5]];
+const groupType = g => g.min >= 1 ? 'req1' : g.max > 1 ? 'multi' : 'opt1';
+
+async function resizeImage(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    await new Promise((ok, bad) => { img.onload = ok; img.onerror = bad; img.src = url; });
+    const max = 900, sc = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const cv = document.createElement('canvas'); cv.width = Math.round(img.naturalWidth * sc); cv.height = Math.round(img.naturalHeight * sc);
+    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+    return await new Promise(ok => cv.toBlob(ok, 'image/jpeg', 0.84));
+  } finally { URL.revokeObjectURL(url); }
+}
+
+function emptyDraft(cat) {
+  return { nome: '', desc: '', preco: '', cat: cat || '', selos: [], prep: 15, kcal: '', alergenos: '', esgotado: false, ativo: true, semHH: false, foto: null, grupos: [], combina: [], fome: 2, vibe: 'conforto' };
+}
+function draftFrom(item) {
+  const d = item.raw || {};
+  return { ...emptyDraft(item.cat), ...JSON.parse(JSON.stringify(d)), preco: String(d.preco ?? ''), kcal: d.kcal ? String(d.kcal) : '', prep: d.prep || 15, grupos: (d.grupos || []).map(g => ({ ...g, opcoes: (g.opcoes || []).map(o => ({ ...o, preco: String(o.preco || 0) })) })) };
+}
+
+function DishEditor({ db, assets, id, start, onClose, say }) {
+  const [d, setD] = useState(start);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
+  const uploaded = useRef([]);
+  const set = patch => setD(x => ({ ...x, ...patch }));
+  const toggleIn = (key, v) => setD(x => ({ ...x, [key]: x[key].includes(v) ? x[key].filter(t => t !== v) : [...x[key], v] }));
+  const setGroup = (gi, patch) => setD(x => ({ ...x, grupos: x.grupos.map((g, k) => k === gi ? { ...g, ...patch } : g) }));
+  const setOpt = (gi, oi, patch) => setD(x => ({ ...x, grupos: x.grupos.map((g, k) => k !== gi ? g : { ...g, opcoes: g.opcoes.map((o, j) => j === oi ? { ...o, ...patch } : o) }) }));
+  const others = ITEMS.filter(i => i.id !== id);
+
+  const pickPhoto = async e => {
+    const file = e.target.files && e.target.files[0]; e.target.value = '';
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { setErr('Escolha um arquivo de imagem (JPG, PNG ou WEBP).'); return; }
+    if (!assets) { setErr('O envio de fotos não está liberado para o seu acesso.'); return; }
+    setPhotoBusy(true); setErr('');
+    try {
+      const blob = await resizeImage(file);
+      const res = await assets.upload(blob);
+      uploaded.current.push(res.id);
+      set({ foto: IS_DEMO ? { id: res.id, url: res.url } : { id: res.id } });
+    } catch (x) {
+      setErr(x && x.code === 'quota_exceeded' ? 'O espaço para fotos acabou. Apague fotos de pratos antigos e tente de novo.' : 'Não deu para enviar a foto. Tente outra imagem ou tente de novo.');
+    }
+    setPhotoBusy(false);
+  };
+  const cleanupUploads = keepId => { uploaded.current.filter(x => x !== keepId).forEach(x => assets && assets.delete(x).catch(() => {})); uploaded.current = []; };
+  const cancel = () => { cleanupUploads(null); onClose(); };
+
+  const save = async () => {
+    const preco = toNum(d.preco);
+    if (!d.nome.trim()) return setErr('Dê um nome ao prato.');
+    if (!(preco >= 0) || d.preco === '') return setErr('Digite o preço, por exemplo 42,90.');
+    if (!d.cat) return setErr('Escolha a categoria do prato.');
+    for (const g of d.grupos) {
+      if (!g.nome.trim()) return setErr('Dê um nome para cada grupo de opções, por exemplo "Ponto da carne".');
+      if (!g.opcoes.length || g.opcoes.some(o => !o.nome.trim())) return setErr(`Preencha as opções do grupo "${g.nome}".`);
+      if (g.opcoes.some(o => isNaN(toNum(o.preco)))) return setErr(`Confira os preços das opções do grupo "${g.nome}".`);
+    }
+    setBusy(true); setErr('');
+    const docId = id || `${slug(d.nome)}-${rid()}`;
+    const old = id && byId[id] ? byId[id].fotoId : null;
+    const body = {
+      nome: d.nome.trim(), desc: d.desc.trim(), preco: Math.round(preco * 100) / 100, cat: d.cat,
+      selos: d.selos, prep: Math.max(1, Number(d.prep) || 15), kcal: Number(d.kcal) || 0, alergenos: d.alergenos.trim(),
+      esgotado: !!d.esgotado, ativo: d.ativo !== false, semHH: !!d.semHH, foto: d.foto && d.foto.id ? (IS_DEMO && d.foto.url ? { id: d.foto.id, url: d.foto.url } : { id: d.foto.id }) : null,
+      combina: d.combina.filter(x => byId[x]).slice(0, 4), fome: Number(d.fome) || 2, vibe: d.vibe || 'conforto',
+      cores: Array.isArray(d.cores) ? d.cores : DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)],
+      ordem: id ? (Number(d.ordem) || 0) : ITEMS.filter(i => i.cat === d.cat).length,
+      grupos: d.grupos.map(g => ({ id: g.id, nome: g.nome.trim(), min: g.min, max: g.max, opcoes: g.opcoes.map(o => ({ id: o.id, nome: o.nome.trim(), preco: Math.round(toNum(o.preco) * 100) / 100 })) })),
+    };
+    try {
+      await db.doc('pratos/' + docId).set(body);
+      cleanupUploads(body.foto && body.foto.id);
+      if (old && old !== (body.foto && body.foto.id) && assets) assets.delete(old).catch(() => {});
+      say(id ? 'Prato atualizado no cardápio' : 'Prato adicionado ao cardápio');
+      onClose();
+    } catch { setErr('Não deu para salvar. Confira a internet e tente de novo.'); }
+    setBusy(false);
+  };
+  const remove = async () => {
+    setBusy(true);
+    try {
+      await db.doc('pratos/' + id).delete();
+      const f = byId[id] && byId[id].fotoId; if (f && assets) assets.delete(f).catch(() => {});
+      cleanupUploads(null); say('Prato apagado'); onClose();
+    } catch { setErr('Não deu para apagar. Tente de novo.'); setBusy(false); }
+  };
+
+  const preview = toItem(id || 'novo', { ...d, preco: toNum(d.preco) || 0 });
+  return html`<${Sheet} onClose=${cancel} label=${id ? 'Editar prato' : 'Novo prato'}><div class="sheet-in">
+    <div class="sheet-head"><h2>${id ? 'Editar prato' : 'Novo prato'}</h2><button class="x" onClick=${cancel} aria-label="Fechar"><${Close}/></button></div>
+
+    <div class="photo-row">
+      <${Plate} item=${preview} cls="lg"/>
+      <div class="rows" style=${{ flex: 1, minWidth: 0 }}>
+        <b>Foto do prato</b>
+        <small class="muted">Use uma foto de cima, bem iluminada. A gente reduz o tamanho automaticamente. Sem foto, aparece um prato ilustrado.</small>
+        <div class="inline">
+          <label class="ghost filebtn" for="foto-input">${photoBusy ? 'Enviando foto…' : d.foto ? 'Trocar foto' : 'Escolher foto'}</label>
+          <input id="foto-input" type="file" accept="image/*" hidden onChange=${pickPhoto} disabled=${photoBusy}/>
+          ${d.foto && html`<button class="ghost" onClick=${() => set({ foto: null })}>Remover foto</button>`}
+        </div>
+      </div>
+    </div>
+
+    <div class="group form">
+      <label for="f-nome">Nome do prato</label>
+      <input id="f-nome" type="text" maxlength="60" value=${d.nome} onInput=${e => set({ nome: e.target.value })} placeholder="Ex.: Filé à parmegiana"/>
+      <label for="f-desc">Descrição</label>
+      <textarea id="f-desc" maxlength="180" value=${d.desc} onInput=${e => set({ desc: e.target.value })} placeholder="Ingredientes e acompanhamentos, em uma ou duas frases"></textarea>
+      <div class="form-2">
+        <div><label for="f-preco">Preço (R$)</label><input id="f-preco" type="text" inputmode="decimal" value=${d.preco} onInput=${e => set({ preco: e.target.value })} placeholder="42,90"/></div>
+        <div><label for="f-cat">Categoria</label><select id="f-cat" value=${d.cat} onChange=${e => set({ cat: e.target.value })}>
+          <option value="">Escolha…</option>${CATS.map(c => html`<option key=${c.id} value=${c.id}>${c.name}</option>`)}</select></div>
+        <div><label for="f-prep">Preparo (min)</label><input id="f-prep" type="number" min="1" value=${d.prep} onInput=${e => set({ prep: e.target.value })}/></div>
+        <div><label for="f-kcal">Calorias (kcal)</label><input id="f-kcal" type="number" min="0" value=${d.kcal} onInput=${e => set({ kcal: e.target.value })} placeholder="opcional"/></div>
+      </div>
+      <label for="f-alerg">Alergênicos</label>
+      <input id="f-alerg" type="text" maxlength="80" value=${d.alergenos} onInput=${e => set({ alergenos: e.target.value })} placeholder="Ex.: glúten, lactose, ovo"/>
+    </div>
+
+    <div class="group">
+      <div class="group-h"><b>Selos</b><span class="req">Aparecem no card do prato</span></div>
+      <div class="selos">${Object.keys(TAGS).map(t => html`<button key=${t} class=${'selo ' + (TAG_CLASS[t] || '')} aria-pressed=${d.selos.includes(t)} onClick=${() => toggleIn('selos', t)}>${TAGS[t]}${TAG_HELP[t] && html`<small>${TAG_HELP[t]}</small>`}</button>`)}</div>
+    </div>
+
+    <div class="group">
+      <div class="group-h"><b>Disponibilidade</b></div>
+      <label class="switch"><input type="checkbox" id="f-ativo" checked=${d.ativo !== false} onChange=${e => set({ ativo: e.target.checked })}/>Mostrar no cardápio</label>
+      <label class="switch"><input type="checkbox" id="f-esg" checked=${!!d.esgotado} onChange=${e => set({ esgotado: e.target.checked })}/>Esgotado hoje</label>
+      <label class="switch"><input type="checkbox" id="f-hh" checked=${!!d.semHH} onChange=${e => set({ semHH: e.target.checked })}/>Fora do desconto de happy hour</label>
+    </div>
+
+    <div class="group">
+      <div class="group-h"><b>Opções e adicionais</b><span class="req">Ponto da carne, tamanho, extras</span></div>
+      ${d.grupos.length === 0 && html`<small class="muted">Nenhuma opção. O cliente pede o prato do jeito que ele é.</small>`}
+      ${d.grupos.map((g, gi) => html`<div class="optgroup" key=${g.id}>
+        <div class="form-2">
+          <div><label for=${'g-n-' + g.id}>Nome do grupo</label><input id=${'g-n-' + g.id} type="text" value=${g.nome} onInput=${e => setGroup(gi, { nome: e.target.value })} placeholder="Ex.: Adicionais"/></div>
+          <div><label for=${'g-t-' + g.id}>Como o cliente escolhe</label><select id=${'g-t-' + g.id} value=${groupType(g)} onChange=${e => { const t = GROUP_TYPES.find(x => x[0] === e.target.value); setGroup(gi, { min: t[2], max: t[3] }); }}>
+            ${GROUP_TYPES.map(t => html`<option key=${t[0]} value=${t[0]}>${t[1]}</option>`)}</select></div>
+        </div>
+        ${g.opcoes.map((o, oi) => html`<div class="optline" key=${o.id}>
+          <input type="text" id=${'o-n-' + o.id} aria-label="Nome da opção" value=${o.nome} onInput=${e => setOpt(gi, oi, { nome: e.target.value })} placeholder="Ex.: Bacon"/>
+          <input type="text" id=${'o-p-' + o.id} aria-label="Preço extra" inputmode="decimal" value=${o.preco} onInput=${e => setOpt(gi, oi, { preco: e.target.value })} placeholder="+ R$ 0"/>
+          <button class="x" aria-label="Tirar opção" onClick=${() => setGroup(gi, { opcoes: g.opcoes.filter((_, j) => j !== oi) })}><${Close}/></button>
+        </div>`)}
+        <div class="inline"><button class="ghost" onClick=${() => setGroup(gi, { opcoes: [...g.opcoes, { id: rid(), nome: '', preco: '0' }] })}>+ Opção</button>
+          <button class="linkbtn" onClick=${() => setD(x => ({ ...x, grupos: x.grupos.filter((_, k) => k !== gi) }))}>Apagar grupo</button></div>
+      </div>`)}
+      <div><button class="ghost" onClick=${() => setD(x => ({ ...x, grupos: [...x.grupos, { id: rid(), nome: '', min: 0, max: 5, opcoes: [{ id: rid(), nome: '', preco: '0' }] }] }))}>+ Grupo de opções</button></div>
+    </div>
+
+    <div class="group">
+      <div class="group-h"><b>Combina com</b><span class="req">Até 4 sugestões</span></div>
+      ${others.length === 0 ? html`<small class="muted">Cadastre outros pratos para sugerir combinações.</small>` : html`<div class="selos">${others.map(o => html`<button key=${o.id} class="selo" aria-pressed=${d.combina.includes(o.id)} disabled=${!d.combina.includes(o.id) && d.combina.length >= 4} onClick=${() => toggleIn('combina', o.id)}>${o.name}</button>`)}</div>`}
+    </div>
+
+    <div class="group form">
+      <div class="group-h"><b>Para o "Me ajuda a escolher"</b></div>
+      <div class="form-2">
+        <div><label for="f-fome">Tamanho da fome</label><select id="f-fome" value=${d.fome} onChange=${e => set({ fome: Number(e.target.value) })}><option value="1">Beliscar</option><option value="2">Fome boa</option><option value="3">Faminto</option></select></div>
+        <div><label for="f-vibe">Vibe</label><select id="f-vibe" value=${d.vibe} onChange=${e => set({ vibe: e.target.value })}><option value="conforto">Conforto</option><option value="fresco">Fresquinho</option><option value="ousado">Ousado</option></select></div>
+      </div>
+    </div>
+
+    ${err && html`<span class="bad" role="alert">${err}</span>`}
+    ${confirmDel ? html`<div class="addrow"><span style=${{ flex: 1 }}>Apagar "${d.nome}" do cardápio? Não dá para desfazer.</span><button class="ghost" onClick=${() => setConfirmDel(false)}>Manter</button><button class="primary danger" style=${{ flex: 'none' }} disabled=${busy} onClick=${remove}><span>Apagar</span></button></div>`
+      : html`<div class="addrow">${id && html`<button class="ghost" onClick=${() => setConfirmDel(true)}>Apagar</button>`}<button class="ghost" onClick=${cancel}>Cancelar</button>
+        <button class="primary" disabled=${busy || photoBusy} onClick=${save}><span>${busy ? 'Salvando…' : id ? 'Salvar alterações' : 'Adicionar ao cardápio'}</span><span>✓</span></button></div>`}
+  </div><//>`;
+}
+
+function Cadastro({ db, assets, config, orders, say }) {
+  const [sub, setSub] = useState('pratos');
+  const [editing, setEditing] = useState(null);
+  const [newCat, setNewCat] = useState('');
+  const [catDel, setCatDel] = useState(null);
+  const cfg = config.cfg || {};
+  const [rest, setRest] = useState(null);
+  const r0 = cfg.restaurante || {};
+  const R = rest || { nome: r0.nome || '', sigla: r0.sigla || '', sub: r0.sub || '', whats: r0.whats || '', hhOn: !!r0.hhOn, hhInicio: r0.hhInicio ?? 17, hhFim: r0.hhFim ?? 20, hhDesc: r0.hhDesc ?? 20 };
+
+  const saveCfg = async (patch, msg) => {
+    try { await db.doc('config/menu').set({ ...cfg, ...patch }); say(msg || 'Salvo'); return true; }
+    catch { say('Não deu para salvar. Tente de novo.'); return false; }
+  };
+  const cats = Array.isArray(cfg.cats) ? cfg.cats : [];
+  const patchDish = async (it, patch, msg) => { try { await db.doc('pratos/' + it.id).update(patch); if (msg) say(msg); } catch { say('Não deu para salvar. Tente de novo.'); } };
+  const moveDish = async (it, dir) => {
+    const list = ITEMS.filter(i => i.cat === it.cat); const k = list.indexOf(it), j = k + dir;
+    if (j < 0 || j >= list.length) return;
+    const re = list.slice(); [re[k], re[j]] = [re[j], re[k]];
+    try { await Promise.all(re.map((x, n) => x.ordem === n ? null : db.doc('pratos/' + x.id).update({ ordem: n }))); } catch { say('Não deu para reordenar.'); }
+  };
+
+  const weekAgo = Date.now() - 7 * 864e5;
+  const sold = {}; orders.filter(o => o.criadoEm >= weekAgo && o.status !== 'cancelado').forEach(o => (o.itens || []).forEach(x => { sold[x.id] = (sold[x.id] || 0) + (x.qtd || 0); }));
+  const best = Object.entries(sold).filter(([k]) => byId[k]).sort((a, b) => b[1] - a[1])[0];
+  const bestItem = best && byId[best[0]];
+
+  const SUBS = [['pratos', `Pratos (${ITEMS.length})`], ['categorias', `Categorias (${cats.length})`], ['restaurante', 'Restaurante']];
+  return html`<section class="panel-sec">
+    <div class="ptabs sub">${SUBS.map(([k, l]) => html`<button key=${k} class=${'ptab' + (sub === k ? ' on' : '')} onClick=${() => setSub(k)}>${l}</button>`)}</div>
+
+    ${sub === 'pratos' && html`
+      <div class="inline" style=${{ justifyContent: 'space-between' }}>
+        <h2>Pratos do cardápio</h2>
+        <button class="primary" style=${{ flex: 'none' }} disabled=${!cats.length} onClick=${() => setEditing({ id: null, start: emptyDraft(cats[0] && cats[0].id) })}><span>+ Novo prato</span></button>
+      </div>
+      ${!cats.length && html`<div class="note">Antes do primeiro prato, crie as categorias do cardápio (Entradas, Pratos, Bebidas…) na aba Categorias.</div>`}
+      ${bestItem && !bestItem.tags.includes('hit') && html`<div class="note chefnote hitnote"><${Chef} size=${48}/><p><b>${bestItem.name}</b> foi o prato mais vendido dos últimos 7 dias (${best[1]} pedidos). Que tal marcar como Hit da casa?</p>
+        <button class="primary" style=${{ flex: 'none' }} onClick=${() => patchDish(bestItem, { selos: [...bestItem.tags, 'hit'] }, 'Selo Hit da casa adicionado')}><span>★ Marcar como Hit</span></button></div>`}
+      ${cats.length > 0 && ITEMS.length === 0 && html`<div class="note chefnote"><${Chef} size=${64} full=${true}/><p>Nenhum prato ainda. Toque em "Novo prato" para cadastrar o primeiro, com foto, preço, selos e adicionais.</p></div>`}
+      ${[...cats.map(c => ({ id: c.id, name: c.nome })), ...(ITEMS.some(i => !cats.some(c => c.id === i.cat)) ? [{ id: '__sem', name: 'Sem categoria (não aparecem no cardápio)' }] : [])].map(c => {
+        const list = ITEMS.filter(i => c.id === '__sem' ? !cats.some(x => x.id === i.cat) : i.cat === c.id);
+        if (!list.length) return null;
+        return html`<div key=${c.id} class="dishcat"><h3>${c.name}</h3>
+          ${list.map((it, k) => html`<div class=${'dishrow' + (it.hidden ? ' off' : '')} key=${it.id}>
+            <${Plate} item=${it}/>
+            <div class="info"><b>${it.name}</b>
+              <div class="meta"><span class="price" style=${{ fontSize: 15 }}>${money(it.price)}</span>${it.tags.map(t => html`<span key=${t} class=${'tag ' + (TAG_CLASS[t] || '')}>${TAGS[t]}</span>`)}</div>
+              <small class="muted">${sold[it.id] ? `${sold[it.id]} vendidos em 7 dias` : 'Sem vendas em 7 dias'}${it.groups.length ? ` · ${it.groups.length} grupo(s) de opções` : ''}${it.foto ? '' : ' · sem foto'}</small>
+            </div>
+            <div class="dishact">
+              <label class="switch"><input type="checkbox" id=${'esg-' + it.id} checked=${it.soldOut} onChange=${e => patchDish(it, { esgotado: e.target.checked }, e.target.checked ? 'Marcado como esgotado' : 'Disponível de novo')}/>Esgotado</label>
+              <label class="switch"><input type="checkbox" id=${'vis-' + it.id} checked=${!it.hidden} onChange=${e => patchDish(it, { ativo: e.target.checked }, e.target.checked ? 'Prato visível' : 'Prato escondido')}/>No cardápio</label>
+              <div class="inline">
+                <button class="ghost sm" aria-label="Subir" disabled=${k === 0} onClick=${() => moveDish(it, -1)}>↑</button>
+                <button class="ghost sm" aria-label="Descer" disabled=${k === list.length - 1} onClick=${() => moveDish(it, 1)}>↓</button>
+                <button class="ghost sm" onClick=${() => setEditing({ id: it.id, start: draftFrom(it) })}>Editar</button>
+              </div>
+            </div>
+          </div>`)}
+        </div>`; })}
+    `}
+
+    ${sub === 'categorias' && html`
+      <h2>Categorias</h2>
+      <div class="note">A ordem aqui é a ordem das abas no cardápio. Marque "Happy hour" nas categorias que ganham desconto no horário.</div>
+      <div class="rows">${cats.map((c, k) => { const n = ITEMS.filter(i => i.cat === c.id).length;
+        return html`<div class="catrow" key=${c.id}>
+          <input type="text" id=${'cat-n-' + c.id} aria-label="Nome da categoria" defaultValue=${c.nome} onBlur=${e => { const v = e.target.value.trim(); if (v && v !== c.nome) saveCfg({ cats: cats.map(x => x.id === c.id ? { ...x, nome: v } : x) }, 'Categoria renomeada'); }}/>
+          <small class="muted num">${n} prato${n === 1 ? '' : 's'}</small>
+          <label class="switch"><input type="checkbox" id=${'cat-hh-' + c.id} checked=${!!c.hh} onChange=${e => saveCfg({ cats: cats.map(x => x.id === c.id ? { ...x, hh: e.target.checked } : x) })}/>Happy hour</label>
+          <button class="ghost sm" aria-label="Subir" disabled=${k === 0} onClick=${() => { const re = cats.slice(); [re[k - 1], re[k]] = [re[k], re[k - 1]]; saveCfg({ cats: re }); }}>↑</button>
+          <button class="ghost sm" aria-label="Descer" disabled=${k === cats.length - 1} onClick=${() => { const re = cats.slice(); [re[k + 1], re[k]] = [re[k], re[k + 1]]; saveCfg({ cats: re }); }}>↓</button>
+          ${catDel === c.id ? html`<button class="ghost sm danger-t" onClick=${() => { setCatDel(null); saveCfg({ cats: cats.filter(x => x.id !== c.id) }, 'Categoria apagada'); }}>Confirmar</button>`
+            : html`<button class="ghost sm" disabled=${n > 0} title=${n > 0 ? 'Mova ou apague os pratos desta categoria antes' : ''} onClick=${() => setCatDel(c.id)}>Apagar</button>`}
+        </div>`; })}</div>
+      ${cats.some(c => ITEMS.some(i => i.cat === c.id)) && html`<small class="muted">Só dá para apagar uma categoria vazia.</small>`}
+      <form class="inline" onSubmit=${e => { e.preventDefault(); const v = newCat.trim(); if (!v) return; saveCfg({ cats: [...cats, { id: slug(v) + '-' + rid(), nome: v, hh: false }] }, 'Categoria criada'); setNewCat(''); }}>
+        <input type="text" id="new-cat" class="grow" value=${newCat} onInput=${e => setNewCat(e.target.value)} placeholder="Nova categoria, ex.: Sobremesas" maxlength="30"/>
+        <button class="primary" style=${{ flex: 'none' }} type="submit"><span>+ Criar</span></button>
+      </form>
+    `}
+
+    ${sub === 'restaurante' && html`
+      <h2>Dados do restaurante</h2>
+      <div class="group form">
+        <div class="form-2">
+          <div><label for="r-nome">Nome</label><input id="r-nome" type="text" maxlength="40" value=${R.nome} onInput=${e => setRest({ ...R, nome: e.target.value })}/></div>
+          <div><label for="r-sigla">Sigla do logo (até 3 letras)</label><input id="r-sigla" type="text" maxlength="3" value=${R.sigla} onInput=${e => setRest({ ...R, sigla: e.target.value.toUpperCase() })}/></div>
+        </div>
+        <label for="r-sub">Frase curta</label><input id="r-sub" type="text" maxlength="60" value=${R.sub} onInput=${e => setRest({ ...R, sub: e.target.value })} placeholder="Ex.: Cozinha caseira · aberto até 23h"/>
+        <label for="r-whats">WhatsApp do restaurante (com DDD)</label><input id="r-whats" type="text" inputmode="tel" value=${R.whats} onInput=${e => setRest({ ...R, whats: e.target.value })} placeholder="Ex.: 55 11 91234-5678"/>
+      </div>
+      <div class="group form">
+        <label class="switch"><input type="checkbox" id="r-hh" checked=${R.hhOn} onChange=${e => setRest({ ...R, hhOn: e.target.checked })}/>Tem happy hour</label>
+        ${R.hhOn && html`<div class="form-2">
+          <div><label for="r-hi">Começa (hora)</label><input id="r-hi" type="number" min="0" max="23" value=${R.hhInicio} onInput=${e => setRest({ ...R, hhInicio: e.target.value })}/></div>
+          <div><label for="r-hf">Termina (hora)</label><input id="r-hf" type="number" min="1" max="24" value=${R.hhFim} onInput=${e => setRest({ ...R, hhFim: e.target.value })}/></div>
+          <div><label for="r-hd">Desconto (%)</label><input id="r-hd" type="number" min="1" max="90" value=${R.hhDesc} onInput=${e => setRest({ ...R, hhDesc: e.target.value })}/></div>
+        </div><small class="muted">O desconto vale para as categorias marcadas com "Happy hour".</small>`}
+      </div>
+      <div class="addrow"><button class="primary" disabled=${!R.nome.trim()} onClick=${async () => {
+        const hi = Number(R.hhInicio), hf = Number(R.hhFim);
+        if (R.hhOn && !(hi >= 0 && hf > hi && hf <= 24)) { say('Confira o horário: o fim precisa ser depois do início.'); return; }
+        if (await saveCfg({ restaurante: { nome: R.nome.trim(), sigla: R.sigla.trim(), sub: R.sub.trim(), whats: R.whats.trim(), hhOn: R.hhOn, hhInicio: hi, hhFim: hf, hhDesc: Number(R.hhDesc) || 0 } }, 'Dados do restaurante salvos')) setRest(null);
+      }}><span>Salvar dados do restaurante</span><span>✓</span></button></div>
+    `}
+
+    ${editing && html`<${DishEditor} key=${editing.id || 'novo'} db=${db} assets=${assets} id=${editing.id} start=${editing.start} say=${say} onClose=${() => setEditing(null)}/>`}
+  </section>`;
+}
+
+function Panel({ caps, config }) {
+  const db = caps.db;
+  const [tab, setTab] = useState('pedidos');
+  const [orders, setOrders] = useState(null);
+  const [calls, setCalls] = useState([]);
+  const [slow, setSlow] = useState(false);
+  const [now, setNow] = useState(Date.now());
+  const [fresh, setFresh] = useState({});
+  const [sound, setSound] = useState(false);
+  const [toast, setToast] = useState('');
+  const [drafts, setDrafts] = useState({});
+  const [purge, setPurge] = useState(false);
+  const [dark, toggleTheme] = useThemeToggle();
+  const audio = useRef(null); const seen = useRef(null); const soundRef = useRef(false);
+  soundRef.current = sound;
+  const say = m => { setToast(m); clearTimeout(say.t); say.t = setTimeout(() => setToast(''), 2400); };
+  const beep = () => { const ac = audio.current; if (!ac) return; [0, .18].forEach(d => { const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(.18, ac.currentTime + d); g.gain.exponentialRampToValueAtTime(.001, ac.currentTime + d + .15); o.connect(g).connect(ac.destination); o.start(ac.currentTime + d); o.stop(ac.currentTime + d + .16); }); };
+
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  useEffect(() => {
+    if (!db || !caps.canEdit) return;
+    const timer = setTimeout(() => setSlow(true), 10000);
+    const u1 = db.collection('pedidos').orderBy('criadoEm', 'desc').limit(300).onSnapshot(s => {
+      if (!s.metadata || !s.metadata.fromCache) { clearTimeout(timer); setSlow(false); }
+      const list = s.docs.map(d => ({ ...d.data(), id: d.id }));
+      if (seen.current) {
+        const novos = list.filter(o => o.status === 'novo' && !seen.current.has(o.id));
+        if (novos.length) { if (soundRef.current) beep(); setFresh(f => { const n = { ...f }; novos.forEach(o => n[o.id] = true); return n; }); }
+      }
+      seen.current = new Set(list.map(o => o.id));
+      setOrders(list);
+    }, () => { clearTimeout(timer); setOrders(o => o || []); setSlow(true); });
+    const u2 = db.collection('chamados').orderBy('em', 'desc').limit(100).onSnapshot(s => {
+      setCalls(s.docs.map(d => ({ ...d.data(), id: d.id })));
+    }, () => {});
+    return () => { clearTimeout(timer); u1(); u2(); };
+  }, [db, caps.canEdit]);
+
+  const header = html`<header class="wrap ptop">
+    <div class="logo"><${Chef} size=${48}/><div><h1 class="ml-word">MESALIVRE</h1><small>Painel · ${RESTAURANT.name}</small></div></div>
+    <div class="actions">
+      <a class="pill" href="#" style=${{ textDecoration: 'none', color: 'inherit' }}>Ver cardápio</a>
+      ${caps.canEdit && db && html`<button class="pill" onClick=${() => { if (!audio.current) { try { audio.current = new (window.AudioContext || window.webkitAudioContext)(); } catch {} } const v = !sound; setSound(v); if (v) setTimeout(beep, 50); }}>${sound ? 'Som ligado' : 'Ligar som de novo pedido'}</button>`}
+      <button class="pill" onClick=${toggleTheme}>${dark ? 'Claro' : 'Escuro'}</button>
+    </div>
+  </header>`;
+
+  if (!caps.ready) return html`${header}<div class="boot">Conectando ao painel…</div>`;
+  if (!db) return html`${header}<main class="wrap panel-sec"><div class="note">Não foi possível carregar os dados do painel. Recarregue a página.</div></main>`;
+  if (!caps.canEdit) return html`${header}<main class="wrap panel-sec"><div class="note">O painel é só para a equipe do restaurante. Entre com uma conta da equipe.</div></main>`;
+
+  const all = orders || [];
+  const today = all.filter(o => o.criadoEm >= startOfDay(now));
+  const by = st => all.filter(o => o.status === st);
+  const openCalls = calls.filter(c => !c.resolvido);
+  const valid = today.filter(o => o.status !== 'cancelado');
+  const revenue = valid.reduce((a, o) => a + (o.total || 0), 0);
+  const timed = valid.filter(o => o.em_pronto);
+  const avgPrep = timed.length ? timed.reduce((a, o) => a + (o.em_pronto - o.criadoEm), 0) / timed.length : 0;
+
+  const move = async (o, st) => { try { await db.doc('pedidos/' + o.id).update({ status: st, ['em_' + st]: Date.now() }); setFresh(f => { const n = { ...f }; delete n[o.id]; return n; }); } catch { say('Não deu para atualizar. Tente de novo.'); } };
+  const cancel = async o => { try { await db.doc('pedidos/' + o.id).update({ status: 'cancelado', em_cancelado: Date.now() }); say(`Pedido #${o.num} cancelado`); } catch { say('Não deu para cancelar. Tente de novo.'); } };
+  const resolve = async c => { try { await db.doc('chamados/' + c.id).update({ resolvido: true, resolvidoEm: Date.now() }); } catch { say('Não deu para marcar como atendido.'); } };
+  const saveConfig = async patch => {
+    try { await db.doc('config/menu').set({ ...(config.cfg || {}), ...patch }); say('Salvo'); } catch { say('Não deu para salvar. Tente de novo.'); }
+  };
+  const doPurge = async () => {
+    const old = all.filter(o => o.criadoEm < startOfDay(now)); const oldCalls = calls.filter(c => c.em < startOfDay(now));
+    try { await Promise.all([...old.map(o => db.doc('pedidos/' + o.id).delete()), ...oldCalls.map(c => db.doc('chamados/' + c.id).delete())]); say(`${old.length} pedidos antigos apagados`); }
+    catch { say('Alguns pedidos não foram apagados. Tente de novo.'); }
+    setPurge(false);
+  };
+
+  const qtyByItem = {}; valid.forEach(o => (o.itens || []).forEach(it => { qtyByItem[it.nome] = (qtyByItem[it.nome] || 0) + it.qtd; }));
+  const top = Object.entries(qtyByItem).sort((a, b) => b[1] - a[1]).slice(0, 6); const topMax = top.length ? top[0][1] : 1;
+  const hours = Array.from({ length: 13 }, (_, k) => 11 + k).map(h => [h, valid.filter(o => new Date(o.criadoEm).getHours() === h).length]);
+  const hMax = Math.max(1, ...hours.map(h => h[1]));
+
+  const TABS = [['pedidos', 'Pedidos', by('novo').length], ['chamados', 'Chamados', openCalls.length], ['cardapio', 'Cardápio', 0], ['resumo', 'Resumo do dia', 0], ['mesas', 'QR das mesas', 0]];
+  const qrSvg = text => { try { const q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); } catch { return ''; } };
+
+  return html`${header}
+    <nav class="catbar"><div class="wrap ptabs">${TABS.map(([id, label, n]) => html`<button key=${id} class=${'ptab' + (tab === id ? ' on' : '')} onClick=${() => setTab(id)}>${label}${n > 0 && html`<span class="dot">${n}</span>`}</button>`)}</div></nav>
+    <main class="wrap">
+      <div class="kpis">
+        <div class="kpi"><small>Faturamento hoje</small><b>${money(revenue)}</b></div>
+        <div class="kpi"><small>Pedidos hoje</small><b>${valid.length}</b></div>
+        <div class="kpi"><small>Ticket médio</small><b>${money(valid.length ? revenue / valid.length : 0)}</b></div>
+        <div class="kpi"><small>Tempo até ficar pronto</small><b>${avgPrep ? Math.round(avgPrep / 60000) + ' min' : '—'}</b></div>
+      </div>
+      ${slow && html`<div class="note" style=${{ marginBottom: 12 }}>Os pedidos estão demorando para carregar. A lista pode estar desatualizada.</div>`}
+
+      ${tab === 'pedidos' && html`<section class="panel-sec">
+        ${orders === null ? html`<div class="empty">Carregando pedidos…</div>` : all.length === 0 ? html`<div class="note chefnote"><${Chef} size=${72} full=${true}/><p>Nenhum pedido ainda. Abra o cardápio, monte um pedido e toque em "Enviar para a cozinha": ele aparece aqui na hora.</p></div>` : html`
+        <div class="board">
+          ${[['novo', 'Novos'], ['cozinha', 'Na cozinha'], ['pronto', 'Prontos'], ['entregue', 'Entregues hoje']].map(([st, label]) => {
+            const list = st === 'entregue' ? today.filter(o => o.status === 'entregue').slice(0, 8) : by(st).slice().reverse();
+            return html`<div class="col" key=${st}><div class="col-h">${label}<span>${st === 'entregue' ? today.filter(o => o.status === 'entregue').length : list.length}</span></div>
+              ${list.length === 0 ? html`<small class="muted" style=${{ padding: '4px 6px' }}>Nada aqui</small>` : list.map(o => html`<${Ticket} key=${o.id} o=${o} now=${now} fresh=${fresh[o.id]} onMove=${move} onCancel=${cancel}/>`)}
+            </div>`; })}
+        </div>`}
+      </section>`}
+
+      ${tab === 'chamados' && html`<section class="panel-sec">
+        <h2>Mesas chamando</h2>
+        ${openCalls.length === 0 ? html`<div class="note">Nenhuma mesa chamando agora. Quando um cliente tocar em "Chamar garçom" ou "Pedir a conta", aparece aqui.</div>` : html`<div class="calls">
+          ${openCalls.map(c => html`<div class="call" key=${c.id}><b>Mesa ${c.mesa}</b><div class="what"><span class=${'tag ' + (c.tipo === 'conta' ? 'pop' : 'new')}>${c.tipo === 'conta' ? 'Pediu a conta' : 'Chamou o garçom'}</span> <span class="muted num">há ${mmss(now - c.em)}</span></div><button class="primary" style=${{ flex: 'none' }} onClick=${() => resolve(c)}><span>Atendido</span></button></div>`)}
+        </div>`}
+      </section>`}
+
+      ${tab === 'cardapio' && html`<${Cadastro} db=${db} assets=${caps.assets} config=${config} orders=${all} say=${say}/>`}
+
+      ${tab === 'resumo' && html`<section class="panel-sec">
+        <h2>Mais pedidos hoje</h2>
+        ${top.length === 0 ? html`<div class="note">Ainda sem pedidos hoje.</div>` : html`<div class="bars">${top.map(([n, q]) => html`<div class="bar" key=${n}><span>${n}</span><i style=${{ width: (q / topMax * 100) + '%' }}></i><b class="num">${q}</b></div>`)}</div>`}
+        <h2>Pedidos por hora</h2>
+        <div class="hours" role="img" aria-label="Pedidos por hora de hoje">${hours.map(([h, n]) => html`<div key=${h}><span>${n || ''}</span><i style=${{ height: (n / hMax * 80) + '%' }}></i><span>${h}h</span></div>`)}</div>
+        <h2>Limpeza</h2>
+        <div class="note">O banco guarda até 25 mil registros. Apague de vez em quando os pedidos de dias anteriores.</div>
+        <div class="inline">${purge
+          ? html`<span>Apagar ${all.filter(o => o.criadoEm < startOfDay(now)).length} pedidos de dias anteriores? Não dá para desfazer.</span><button class="ghost" onClick=${() => setPurge(false)}>Manter</button><button class="primary" style=${{ flex: 'none', background: 'var(--chili)', color: '#fff' }} onClick=${doPurge}><span>Apagar</span></button>`
+          : html`<button class="ghost" onClick=${() => setPurge(true)}>Apagar pedidos de dias anteriores</button>`}</div>
+      </section>`}
+
+      ${tab === 'mesas' && html`<section class="panel-sec">
+        <h2>QR code de cada mesa</h2>
+        <div class="inline" style=${{ justifyContent: 'space-between' }}><span>Quantidade de mesas</span>
+          <div class="stepper sm"><button onClick=${() => saveConfig({ mesas: Math.max(1, config.mesas - 1) })} aria-label="Menos mesas">−</button><b>${config.mesas}</b><button onClick=${() => saveConfig({ mesas: Math.min(60, config.mesas + 1) })} aria-label="Mais mesas">+</button></div></div>
+        <div class="note">Cada QR abre o cardápio com o número da mesa já preenchido. Tire um print e imprima para colocar nas mesas.</div>
+        <div class="qrs">${Array.from({ length: config.mesas }, (_, k) => k + 1).map(n => { const url = `${location.href.split('#')[0]}#mesa-${n}`; const svg = window.qrcode ? qrSvg(url) : '';
+          return html`<div class="qr" key=${n}><b>Mesa ${n}</b>${svg ? html`<div style=${{ width: '100%', display: 'flex', justifyContent: 'center' }} dangerouslySetInnerHTML=${{ __html: svg }}></div>` : html`<small>QR indisponível</small>`}<small>${url}</small></div>`; })}</div>
+      </section>`}
+      <div style=${{ height: 40 }}></div>
+    </main>
+    ${toast && html`<div class="toast" role="status" style=${{ bottom: 'calc(24px + env(safe-area-inset-bottom,0px))' }}>${toast}</div>`}
+  `;
+}
+
+function Root() {
+  const caps = useCaps();
+  const config = useMenuData(caps.db);
+  const [route, setRoute] = useState(location.hash === '#painel' ? 'painel' : 'menu');
+  useEffect(() => { const f = () => { setRoute(location.hash === '#painel' ? 'painel' : 'menu'); scrollTo(0, 0); }; addEventListener('hashchange', f); return () => removeEventListener('hashchange', f); }, []);
+  return html`<${DemoBar}/>${route === 'painel' ? html`<${Panel} caps=${caps} config=${config}/>` : html`<${MenuApp} caps=${caps} config=${config}/>`}`;
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(html`<${Root}/>`);
+</script>
+</body>
+</html>
